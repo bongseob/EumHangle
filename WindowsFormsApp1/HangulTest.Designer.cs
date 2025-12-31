@@ -117,42 +117,50 @@
             // 
             // btnSaveAsDistribution
             // 
+            this.btnSaveAsDistribution.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSaveAsDistribution.ForeColor = System.Drawing.Color.White;
             this.btnSaveAsDistribution.Location = new System.Drawing.Point(130, 60);
             this.btnSaveAsDistribution.Name = "btnSaveAsDistribution";
             this.btnSaveAsDistribution.Size = new System.Drawing.Size(110, 23);
             this.btnSaveAsDistribution.TabIndex = 3;
             this.btnSaveAsDistribution.Text = "배포문서로저장";
-            this.btnSaveAsDistribution.UseVisualStyleBackColor = true;
+            this.btnSaveAsDistribution.UseVisualStyleBackColor = false;
             this.btnSaveAsDistribution.Click += new System.EventHandler(this.btnSaveAsDistribution_Click);
             // 
             // btnSaveAsPdf
             // 
+            this.btnSaveAsPdf.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSaveAsPdf.ForeColor = System.Drawing.Color.White;
             this.btnSaveAsPdf.Location = new System.Drawing.Point(9, 60);
             this.btnSaveAsPdf.Name = "btnSaveAsPdf";
             this.btnSaveAsPdf.Size = new System.Drawing.Size(110, 23);
             this.btnSaveAsPdf.TabIndex = 2;
             this.btnSaveAsPdf.Text = "PDF로 저장";
-            this.btnSaveAsPdf.UseVisualStyleBackColor = true;
+            this.btnSaveAsPdf.UseVisualStyleBackColor = false;
             this.btnSaveAsPdf.Click += new System.EventHandler(this.btnSaveAsPdf_Click);
             // 
             // btnOpenDocument
             // 
+            this.btnOpenDocument.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnOpenDocument.ForeColor = System.Drawing.Color.White;
             this.btnOpenDocument.Location = new System.Drawing.Point(130, 22);
             this.btnOpenDocument.Name = "btnOpenDocument";
             this.btnOpenDocument.Size = new System.Drawing.Size(110, 23);
             this.btnOpenDocument.TabIndex = 1;
             this.btnOpenDocument.Text = "문서열기";
-            this.btnOpenDocument.UseVisualStyleBackColor = true;
+            this.btnOpenDocument.UseVisualStyleBackColor = false;
             this.btnOpenDocument.Click += new System.EventHandler(this.btnOpenDocument_Click);
             // 
             // btnNewDocument
             // 
+            this.btnNewDocument.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnNewDocument.ForeColor = System.Drawing.Color.White;
             this.btnNewDocument.Location = new System.Drawing.Point(9, 22);
             this.btnNewDocument.Name = "btnNewDocument";
             this.btnNewDocument.Size = new System.Drawing.Size(110, 23);
             this.btnNewDocument.TabIndex = 0;
             this.btnNewDocument.Text = "새문서만들기";
-            this.btnNewDocument.UseVisualStyleBackColor = true;
+            this.btnNewDocument.UseVisualStyleBackColor = false;
             this.btnNewDocument.Click += new System.EventHandler(this.btnNewHwp_Click);
             // 
             // groupBox2
@@ -169,12 +177,14 @@
             // 
             // btnInsertText
             // 
+            this.btnInsertText.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnInsertText.ForeColor = System.Drawing.Color.White;
             this.btnInsertText.Location = new System.Drawing.Point(157, 59);
             this.btnInsertText.Name = "btnInsertText";
             this.btnInsertText.Size = new System.Drawing.Size(75, 23);
             this.btnInsertText.TabIndex = 2;
             this.btnInsertText.Text = "문장추가";
-            this.btnInsertText.UseVisualStyleBackColor = true;
+            this.btnInsertText.UseVisualStyleBackColor = false;
             this.btnInsertText.Click += new System.EventHandler(this.btnInsertText_Click);
             // 
             // txtInsertText
@@ -210,12 +220,14 @@
             // 
             // btnReplaceAll
             // 
+            this.btnReplaceAll.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnReplaceAll.ForeColor = System.Drawing.Color.White;
             this.btnReplaceAll.Location = new System.Drawing.Point(136, 98);
             this.btnReplaceAll.Name = "btnReplaceAll";
             this.btnReplaceAll.Size = new System.Drawing.Size(96, 23);
             this.btnReplaceAll.TabIndex = 4;
             this.btnReplaceAll.Text = "문자열바꾸기";
-            this.btnReplaceAll.UseVisualStyleBackColor = true;
+            this.btnReplaceAll.UseVisualStyleBackColor = false;
             this.btnReplaceAll.Click += new System.EventHandler(this.btnReplaceAll_Click);
             // 
             // txtReplaceText
@@ -277,12 +289,14 @@
             // 
             // btnSetTableCell
             // 
+            this.btnSetTableCell.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSetTableCell.ForeColor = System.Drawing.Color.White;
             this.btnSetTableCell.Location = new System.Drawing.Point(232, 144);
             this.btnSetTableCell.Name = "btnSetTableCell";
             this.btnSetTableCell.Size = new System.Drawing.Size(100, 23);
             this.btnSetTableCell.TabIndex = 13;
             this.btnSetTableCell.Text = "셀에값입력";
-            this.btnSetTableCell.UseVisualStyleBackColor = true;
+            this.btnSetTableCell.UseVisualStyleBackColor = false;
             this.btnSetTableCell.Click += new System.EventHandler(this.btnSetTableCell_Click);
             // 
             // txtCellText
@@ -355,12 +369,14 @@
             // 
             // btnCreateTable
             // 
+            this.btnCreateTable.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnCreateTable.ForeColor = System.Drawing.Color.White;
             this.btnCreateTable.Location = new System.Drawing.Point(232, 30);
             this.btnCreateTable.Name = "btnCreateTable";
             this.btnCreateTable.Size = new System.Drawing.Size(100, 23);
             this.btnCreateTable.TabIndex = 4;
             this.btnCreateTable.Text = "표 만들기";
-            this.btnCreateTable.UseVisualStyleBackColor = true;
+            this.btnCreateTable.UseVisualStyleBackColor = false;
             this.btnCreateTable.Click += new System.EventHandler(this.btnCreateTable_Click);
             // 
             // txtTableCols
@@ -409,12 +425,14 @@
             // 
             // btnInsertImage
             // 
+            this.btnInsertImage.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnInsertImage.ForeColor = System.Drawing.Color.White;
             this.btnInsertImage.Location = new System.Drawing.Point(9, 22);
             this.btnInsertImage.Name = "btnInsertImage";
             this.btnInsertImage.Size = new System.Drawing.Size(110, 23);
             this.btnInsertImage.TabIndex = 0;
             this.btnInsertImage.Text = "그림추가";
-            this.btnInsertImage.UseVisualStyleBackColor = true;
+            this.btnInsertImage.UseVisualStyleBackColor = false;
             this.btnInsertImage.Click += new System.EventHandler(this.btnInsertImage_Click);
             // 
             // openFileDialog1
@@ -435,7 +453,7 @@
             this.Controls.Add(this.btnChangeHwp1);
             this.Controls.Add(this.btnNewHwp);
             this.Name = "HangulTest";
-            this.Text = "Form1";
+            this.Text = "한글연동 테스트";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);

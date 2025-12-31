@@ -350,30 +350,67 @@ namespace Eum.Hwp
             return false;
         }
 
-        private bool IsKeyIndicatorCell(string cell)
+        /// <summary>
+        /// 현재 커서 위치 정보 가져오기
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        private int[] GetCursorInfo(string cell)
         {
             try
             {
-                var indicator = _hwp.KeyIndicator();
-                if (indicator == null) return false;
-
-                if (indicator is string s)
-                    return s.StartsWith("(" + cell + ")");
-
-                if (indicator is Array arr && arr.Length > 0)
-                {
-                    var last = arr.GetValue(arr.Length - 1)?.ToString();
-                    return !string.IsNullOrEmpty(last) && last.StartsWith("(" + cell + ")");
-                }
-
-                var fallback = indicator.ToString();
-                return !string.IsNullOrEmpty(fallback) && fallback.StartsWith("(" + cell + ")");
+                _hwp.KeyIndicator(out int seccnt, out int secno, out int prnpageno, out int colno, out int line, out int pos, out short over, out string ctrlname);
+                int[] list = new int[6];
+                list[0] = seccnt;               // 총 구역
+                list[1] = secno;                // 구역 번호
+                list[2] = prnpageno;            // 페이지 번호
+                list[3] = colno;                // 다단 번호
+                list[4] = line;                 // 줄 번호
+                list[5] = pos;                  // 칸(컬럼) 번호
+                                                // short ins_over = over;      // 삽입, 수정
+                return list;
             }
             catch
             {
-                return false;
+                return null;
             }
         }
+
+        /// <summary>
+        /// 현재 컨트롤 이름 가져오기
+        /// </summary>
+        /// <returns></returns>
+        private string GetCtrlName()
+        {
+            try
+            {
+                _hwp.KeyIndicator(out int seccnt, out int secno, out int prnpageno, out int colno, out int line, out int pos, out short over, out string ctrlname);
+                return ctrlname;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 현재 셀 주소 가져오기 (예: A1, E3 등)
+        /// </summary>
+        /// <returns></returns>
+        private string GetCellAddr()
+        {
+            try
+            {
+                string cell = GetCtrlName();
+                cell = cell.Split('(', ')')[1];
+                return cell;
+            }
+            catch 
+            { 
+                return null; 
+            }
+        }
+
 
         /// <summary>
         /// 표 셀 안에 커서가 위치하도록 시도
@@ -381,9 +418,9 @@ namespace Eum.Hwp
         /// <returns></returns>
         private bool EnsureCaretInTableCell()
         {
-            //if (TryAction("ShapeObjTableSelCell")) return true;
             try
             {
+                //TryAction("ShapeObjTableSelCell")
                 _hwp.Run("ShapeObjTableSelCell");
             }
             catch
