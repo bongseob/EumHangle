@@ -187,7 +187,7 @@ namespace WindowsFormsApp1
             {
                 try
                 {
-                    _hwpDocument.SaveAsDistribution(saveFileDialog1.FileName, "1234");
+                    _hwpDocument.SaveAsDistribution(saveFileDialog1.FileName, "12345");
                     MessageBox.Show("Saved as distribution document.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -213,6 +213,44 @@ namespace WindowsFormsApp1
         {
             if (!IsDocumentReady()) return;
             _hwpDocument.CreateTable(int.Parse(txtTableRows.Text), int.Parse(txtTableRows.Text), 1, 1);
+        }
+
+        private void btnSetTableCell_Click(object sender, EventArgs e)
+        {
+            if (!IsDocumentReady()) return;
+            try
+            {
+                if (!int.TryParse(txtTableIndex.Text, out int tableIndex) ||
+                    !int.TryParse(txtCellRow.Text, out int row) ||
+                    !int.TryParse(txtCellCol.Text, out int col))
+                {
+                    MessageBox.Show("테이블 인덱스, 행, 열에 유효한 숫자를 입력하세요.", "입력 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                _hwpDocument.SetTableCellText(tableIndex, row, col, txtCellText.Text);
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
+        }
+
+        private void btnInsertImage_Click(object sender, EventArgs e)
+        {
+            if (!IsDocumentReady()) return;
+
+            openFileDialog1.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    _hwpDocument.InsertImage(openFileDialog1.FileName);
+                }
+                catch (Exception ex)
+                {
+                    HandleException(ex);
+                }
+            }
         }
     }
 }

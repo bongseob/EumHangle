@@ -43,6 +43,63 @@ namespace Eum.Hwp
             _hwp.HAction.Execute("InsertText", _hwp.HParameterSet.HInsertText.HSet);
         }
 
+        public void DeleteTable(int tableIndex)
+        {
+            if (!MoveToTableByIndex(tableIndex))
+                throw new InvalidOperationException($"표를 찾지 못했습니다. index={tableIndex}");
+
+            _hwp.HAction.GetDefault("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
+            _hwp.HAction.Execute("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
+        }
+        /// <summary>
+        /// 지정된 경로의 이미지를 현재 커서 위치에 삽입합니다.
+        /// https://forum.developer.hancom.com/t/c-dll-insertbackgroundpicture/41
+        /// axHwpCtrl1.InsertBackgroundPicture("SelectedCell","C:/test/test.bmp");
+        /// (이미지삽입) 수행 이전에 vHwpCtrl.SetMessageBoxMode(0x00000100); 을 먼저 수행해주어야 합니다.
+        /// 다시 설정을 해제하는 vHwpCtrl.SetMessageBoxMode(0x00000000);를 적용
+        /// </summary>
+        public void InsertImage(string imagePath)
+        {
+            //_hwp.InsertPicture(imagePath, true, 1);
+            
+            _hwp.HAction.Execute("PictureInsertDialog", _hwp.HParameterSet.HInsertText.HSet);
+        }
+
+        /// <summary>
+        /// 지정된 표의 특정 셀에 텍스트를 입력합니다.
+        /// </summary>
+        public void SetTableCellText(int tableIndex, int row, int col, string text)
+        {
+            string tableFieldList = _hwp.GetFieldList(0, "tbl");
+            string[] tableFields = tableFieldList.Split('\x02');
+
+            if (string.IsNullOrEmpty(tableFieldList) || tableIndex < 0 || tableIndex >= tableFields.Length)
+            {
+                throw new System.IndexOutOfRangeException($"테이블을 찾을 수 없거나 테이블 인덱스({tableIndex})가 잘못되었습니다. 문서에 있는 테이블 수: {(string.IsNullOrEmpty(tableFieldList) ? 0 : tableFields.Length)}");
+            }
+
+            string targetTableField = tableFields[tableIndex];
+
+            if (!_hwp.MoveToField(targetTableField, true, true, true))
+            {
+                throw new System.Exception($"문서에서 '{targetTableField}' 표를 찾는 데 실패했습니다.");
+            }
+
+            _hwp.HAction.GetDefault("TableCellBlock", _hwp.HParameterSet.HTableCellBlock.HSet);
+            _hwp.HParameterSet.HTableCellBlock.StartRow = row;
+            _hwp.HParameterSet.HTableCellBlock.StartCol = col;
+            _hwp.HParameterSet.HTableCellBlock.EndRow = row;
+            _hwp.HParameterSet.HTableCellBlock.EndCol = col;
+            _hwp.HAction.Execute("TableCellBlock", _hwp.HParameterSet.HTableCellBlock.HSet);
+
+            _hwp.HAction.GetDefault("Delete", _hwp.HParameterSet.HSelection.HSet);
+            _hwp.HAction.Execute("Delete", _hwp.HParameterSet.HSelection.HSet);
+
+            InsertText(text);
+
+            _hwp.MoveToField(targetTableField, false, false, false);
+        }
+
         public void ReplaceAll(string find, string replace)
         {
             ReplaceAll(find, replace, FindReplaceOptions.Default);
@@ -252,7 +309,7 @@ namespace Eum.Hwp
                         if (TryMoveToCtrl(ctrl))
                             return true;
 
-                        return MoveToTableByIndexWithSelection(index);
+                        //return MoveToTableByIndexWithSelection(index);
                     }
                     count++;
                 }
@@ -261,7 +318,8 @@ namespace Eum.Hwp
                 catch { break; }
             }
 
-            return MoveToTableByIndexWithSelection(index);
+            return false;
+            //return MoveToTableByIndexWithSelection(index);
         }
 
         private bool MoveToTableByIndexWithSelection(int index)
@@ -700,10 +758,7 @@ namespace Eum.Hwp
         /// <exception cref="InvalidOperationException"></exception>
         public void SaveAsDistribution(string filePath, string password = null)
         {
-            _hwp.HAction.GetDefault("FileSaveAs", _hwp.HParameterSet.HFileOpenSave.HSet);
-            _hwp.HParameterSet.HFileOpenSave.filename = filePath;
-            _hwp.HParameterSet.HFileOpenSave.Format = "HWP"; // 필요 시 "HWPX" 등으로 변경
-            _hwp.HAction.Execute("FileSaveAs", _hwp.HParameterSet.HFileOpenSave.HSet);
+            SaveAs(filePath);
 
             var act = _hwp.CreateAction("FileSetSecurity");
             var set = act.CreateSet();
@@ -711,7 +766,7 @@ namespace Eum.Hwp
                 throw new InvalidOperationException("보안 설정 액션 생성 실패");
 
             act.GetDefault(set);
-            if (!string.IsNullOrEmpty(password))
+            if (!string.IsNullOrEmpty(password) && password.Length > 4)
             {
                 set.SetItem("Password", password);
             }

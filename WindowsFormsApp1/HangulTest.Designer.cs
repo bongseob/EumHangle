@@ -283,6 +283,7 @@
             this.btnSetTableCell.TabIndex = 13;
             this.btnSetTableCell.Text = "Set Cell Text";
             this.btnSetTableCell.UseVisualStyleBackColor = true;
+            this.btnSetTableCell.Click += new System.EventHandler(this.btnSetTableCell_Click);
             // 
             // txtCellText
             // 
@@ -414,6 +415,7 @@
             this.btnInsertImage.TabIndex = 0;
             this.btnInsertImage.Text = "Insert Image";
             this.btnInsertImage.UseVisualStyleBackColor = true;
+            this.btnInsertImage.Click += new System.EventHandler(this.btnInsertImage_Click);
             // 
             // openFileDialog1
             // 
