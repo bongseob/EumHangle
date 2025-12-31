@@ -59,23 +59,57 @@ namespace WindowsFormsApp1
         
         private void Form1_Load(object sender, EventArgs e)
         {
-            // 한글 파일 열 때 경고문 출현 방지
-            // 레지스트리에 보안모듈 추가
-            string checkFile = Application.StartupPath + @"\FilePathCheckerModuleExample.dll";
-            if (!System.IO.File.Exists(checkFile))
-            {
-                MessageBox.Show("보안 모듈 파일이 존재하지 않습니다: " + checkFile, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            RegisterSecurityModule();
+            // 한글 파일 열 때 경고문 출현 방지 (레지스트리에 보안모듈 추가)
+            //string checkFile = Application.StartupPath + @"\FilePathCheckerModuleExample.dll";
+            //if (!System.IO.File.Exists(checkFile))
+            //{
+            //    MessageBox.Show("보안 모듈 파일이 존재하지 않습니다: " + checkFile, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules", true);
-            if (key == null)
+            //RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules", true);
+            //if (key == null)
+            //{
+            //    key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules");
+            //}
+            //if (key.GetValue("FilePathCheckerModuleExample") == null)
+            //{
+            //    key.SetValue("FilePathCheckerModuleExample", Application.StartupPath + @"\FilePathCheckerModuleExample.dll");
+            //}
+        }
+
+        /// <summary>
+        /// 한/글 자동화 보안 모듈을 레지스트리에 등록하여 파일 접근 보안 창이 뜨지 않도록 합니다.
+        /// </summary>
+        private static void RegisterSecurityModule()
+        {
+            try
             {
-                key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules");
+                string moduleFileName = "FilePathCheckerModuleExample.dll";
+                string executablePath = Application.StartupPath + @"\" + moduleFileName;
+
+                // 레지스트리 키 경로
+                string keyPath = @"Software\HNC\HwpAutomation\Modules";
+
+                if (!System.IO.File.Exists(executablePath))
+                {
+                    MessageBox.Show("보안 모듈 파일이 존재하지 않습니다: " + executablePath, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(keyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue("FilePathCheckerModuleExample", executablePath, RegistryValueKind.String);
+                    }
+                }
             }
-            if (key.GetValue("FilePathCheckerModuleExample") == null)
+            catch (Exception ex)
             {
-                key.SetValue("FilePathCheckerModuleExample", Application.StartupPath + @"\FilePathCheckerModuleExample.dll");
+                // 레지스트리 접근 실패 시 오류 메시지를 보여주지만, 앱 실행은 계속됩니다.
+                MessageBox.Show($"한/글 보안 모듈 레지스트리 등록 실패: {ex.Message}", "레지스트리 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

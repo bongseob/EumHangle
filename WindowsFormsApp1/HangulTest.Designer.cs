@@ -113,7 +113,7 @@
             this.groupBox1.Size = new System.Drawing.Size(250, 100);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "File Operations";
+            this.groupBox1.Text = "파일기능";
             // 
             // btnSaveAsDistribution
             // 
@@ -121,7 +121,7 @@
             this.btnSaveAsDistribution.Name = "btnSaveAsDistribution";
             this.btnSaveAsDistribution.Size = new System.Drawing.Size(110, 23);
             this.btnSaveAsDistribution.TabIndex = 3;
-            this.btnSaveAsDistribution.Text = "Save as Distribution";
+            this.btnSaveAsDistribution.Text = "배포문서로저장";
             this.btnSaveAsDistribution.UseVisualStyleBackColor = true;
             this.btnSaveAsDistribution.Click += new System.EventHandler(this.btnSaveAsDistribution_Click);
             // 
@@ -131,7 +131,7 @@
             this.btnSaveAsPdf.Name = "btnSaveAsPdf";
             this.btnSaveAsPdf.Size = new System.Drawing.Size(110, 23);
             this.btnSaveAsPdf.TabIndex = 2;
-            this.btnSaveAsPdf.Text = "Save as PDF";
+            this.btnSaveAsPdf.Text = "PDF로 저장";
             this.btnSaveAsPdf.UseVisualStyleBackColor = true;
             this.btnSaveAsPdf.Click += new System.EventHandler(this.btnSaveAsPdf_Click);
             // 
@@ -141,7 +141,7 @@
             this.btnOpenDocument.Name = "btnOpenDocument";
             this.btnOpenDocument.Size = new System.Drawing.Size(110, 23);
             this.btnOpenDocument.TabIndex = 1;
-            this.btnOpenDocument.Text = "Open Document";
+            this.btnOpenDocument.Text = "문서열기";
             this.btnOpenDocument.UseVisualStyleBackColor = true;
             this.btnOpenDocument.Click += new System.EventHandler(this.btnOpenDocument_Click);
             // 
@@ -151,7 +151,7 @@
             this.btnNewDocument.Name = "btnNewDocument";
             this.btnNewDocument.Size = new System.Drawing.Size(110, 23);
             this.btnNewDocument.TabIndex = 0;
-            this.btnNewDocument.Text = "New Document";
+            this.btnNewDocument.Text = "새문서만들기";
             this.btnNewDocument.UseVisualStyleBackColor = true;
             this.btnNewDocument.Click += new System.EventHandler(this.btnNewHwp_Click);
             // 
@@ -165,7 +165,7 @@
             this.groupBox2.Size = new System.Drawing.Size(250, 100);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Text Editing";
+            this.groupBox2.Text = "편집하기";
             // 
             // btnInsertText
             // 
@@ -173,7 +173,7 @@
             this.btnInsertText.Name = "btnInsertText";
             this.btnInsertText.Size = new System.Drawing.Size(75, 23);
             this.btnInsertText.TabIndex = 2;
-            this.btnInsertText.Text = "Insert Text";
+            this.btnInsertText.Text = "문장추가";
             this.btnInsertText.UseVisualStyleBackColor = true;
             this.btnInsertText.Click += new System.EventHandler(this.btnInsertText_Click);
             // 
@@ -190,9 +190,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(16, 17);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(83, 12);
+            this.label1.Size = new System.Drawing.Size(85, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Text to Insert:";
+            this.label1.Text = "추가할 문자열:";
             // 
             // groupBox3
             // 
@@ -206,15 +206,15 @@
             this.groupBox3.Size = new System.Drawing.Size(250, 130);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Find/Replace";
+            this.groupBox3.Text = "찾기/바꾸기";
             // 
             // btnReplaceAll
             // 
-            this.btnReplaceAll.Location = new System.Drawing.Point(157, 98);
+            this.btnReplaceAll.Location = new System.Drawing.Point(136, 98);
             this.btnReplaceAll.Name = "btnReplaceAll";
-            this.btnReplaceAll.Size = new System.Drawing.Size(75, 23);
+            this.btnReplaceAll.Size = new System.Drawing.Size(96, 23);
             this.btnReplaceAll.TabIndex = 4;
-            this.btnReplaceAll.Text = "Replace All";
+            this.btnReplaceAll.Text = "문자열바꾸기";
             this.btnReplaceAll.UseVisualStyleBackColor = true;
             this.btnReplaceAll.Click += new System.EventHandler(this.btnReplaceAll_Click);
             // 
@@ -231,9 +231,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(16, 56);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(82, 12);
+            this.label3.Size = new System.Drawing.Size(81, 12);
             this.label3.TabIndex = 2;
-            this.label3.Text = "Replace with:";
+            this.label3.Text = "변경할문자열:";
             // 
             // txtFindText
             // 
@@ -248,9 +248,9 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(16, 17);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(64, 12);
+            this.label2.Size = new System.Drawing.Size(69, 12);
             this.label2.TabIndex = 0;
-            this.label2.Text = "Find what:";
+            this.label2.Text = "찾을문자열:";
             // 
             // groupBox4
             // 
