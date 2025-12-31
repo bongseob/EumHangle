@@ -1,6 +1,7 @@
 ﻿using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -43,14 +44,6 @@ namespace Eum.Hwp
             _hwp.HAction.Execute("InsertText", _hwp.HParameterSet.HInsertText.HSet);
         }
 
-        public void DeleteTable(int tableIndex)
-        {
-            if (!MoveToTableByIndex(tableIndex))
-                throw new InvalidOperationException($"표를 찾지 못했습니다. index={tableIndex}");
-
-            _hwp.HAction.GetDefault("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
-            _hwp.HAction.Execute("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
-        }
         /// <summary>
         /// 지정된 경로의 이미지를 현재 커서 위치에 삽입합니다.
         /// https://forum.developer.hancom.com/t/c-dll-insertbackgroundpicture/41
@@ -60,16 +53,36 @@ namespace Eum.Hwp
         /// </summary>
         public void InsertImage(string imagePath)
         {
-            //_hwp.InsertPicture(imagePath, true, 1);
-            
-            _hwp.HAction.Execute("PictureInsertDialog", _hwp.HParameterSet.HInsertText.HSet);
+            //_hwp.InsertPicture(imagePath, true, 0);
+            //_hwp.InsertPicture(imagePath, true, 0, 0, 0, 0);
+            bool embedded = true;
+            int sizeoption = 2;
+            bool reverse = false;
+            bool watermark = false;
+            int effect = 0;
+            int mmPicWidth = 0;
+            int mmPicHeight = 0;
+            _hwp.InsertPicture(imagePath, embedded, sizeoption, reverse, watermark, effect, mmPicWidth, mmPicHeight);
+
+            //_hwp.HAction.Execute("PictureInsertDialog", _hwp.HParameterSet.HInsertText.HSet);
         }
+
+        public void DeleteTable(int tableIndex)
+        {
+            if (!MoveToTableByIndex(tableIndex))
+                throw new InvalidOperationException($"표를 찾지 못했습니다. index={tableIndex}");
+
+            _hwp.HAction.GetDefault("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
+            _hwp.HAction.Execute("DeleteCtrl", _hwp.HParameterSet.HDeleteCtrl.HSet);
+        }
+
 
         /// <summary>
         /// 지정된 표의 특정 셀에 텍스트를 입력합니다.
         /// </summary>
         public void SetTableCellText(int tableIndex, int row, int col, string text)
         {
+            /*
             string tableFieldList = _hwp.GetFieldList(0, "tbl");
             string[] tableFields = tableFieldList.Split('\x02');
 
@@ -98,6 +111,17 @@ namespace Eum.Hwp
             InsertText(text);
 
             _hwp.MoveToField(targetTableField, false, false, false);
+            */
+
+            if (tableIndex < 0 || row < 0 || col < 0)
+            {
+                throw new System.IndexOutOfRangeException($"테이블을 찾을 수 없거나 테이블 인덱스({tableIndex})가 잘못되었습니다.");
+            }
+
+            MoveToTableByIndex(tableIndex);
+            MoveToCell(row, col);
+            InsertText(text);
+
         }
 
         public void ReplaceAll(string find, string replace)
@@ -159,10 +183,6 @@ namespace Eum.Hwp
 
             if (!MoveToTableByIndex(tableIndexZeroBased))
                 throw new InvalidOperationException($"표를 찾지 못했습니다. index={tableIndexZeroBased}");
-
-            // 표 안으로 진입
-            if (!EnsureCaretInTableCell())
-                throw new InvalidOperationException("표 셀 진입 실패");
 
             // 첫 셀로 이동 후 원하는 셀로 이동
             MoveToFirstCell();
@@ -267,6 +287,14 @@ namespace Eum.Hwp
         }
 
 
+        private void MoveToFirstRow()
+        {
+            // 맨 위/왼쪽 셀로 이동
+            for (int i = 0; i < 50; i++) // 안전 루프
+            {
+                if (!TryAction("TableUpperCell")) break;
+            }
+        }
 
         private void MoveToFirstCell()
         {
@@ -280,9 +308,11 @@ namespace Eum.Hwp
 
         private void MoveToCell(int row, int col)
         {
+            MoveToFirstRow();
             for (int r = 0; r < row; r++)
                 RunActionAny("TableLowerCell");
 
+            RunActionAny("TableColBegin");
             for (int c = 0; c < col; c++)
                 RunActionAny("TableRightCell");
         }
@@ -303,13 +333,12 @@ namespace Eum.Hwp
                 {
                     if (count == index)
                     {
-                        if (TryEnterTableByCtrl(ctrl))
-                            return true;
+                        var anchor = ctrl.GetAnchorPos(0);
+                        _hwp.SetPosBySet(anchor);
+                        _hwp.FindCtrl();
 
-                        if (TryMoveToCtrl(ctrl))
-                            return true;
-
-                        //return MoveToTableByIndexWithSelection(index);
+                        TryAction("ShapeObjTableSelCell");
+                        return true;
                     }
                     count++;
                 }
@@ -319,69 +348,6 @@ namespace Eum.Hwp
             }
 
             return false;
-            //return MoveToTableByIndexWithSelection(index);
-        }
-
-        private bool MoveToTableByIndexWithSelection(int index)
-        {
-            int count = 0;
-
-            TryAction("MoveDocBegin");
-
-            for (int i = 0; i < 500; i++)
-            {
-                if (!TryAction("SelectCtrlFront"))
-                    break;
-
-                if (TryGetCurSelectedCtrlId(out string ctrlId) && ctrlId == "tbl")
-                {
-                    if (count == index)
-                    {
-                        if (TryEnterTableBySelection())
-                            return true;
-                        return false;
-                    }
-                    count++;
-                }
-            }
-
-            return false;
-        }
-
-        private bool TryEnterTableByCtrl(dynamic ctrl)
-        {
-            try
-            {
-                var anchor = ctrl.GetAnchorPos(0);
-                _hwp.SetPosBySet(anchor);
-                _hwp.FindCtrl();
-
-                TryAction("ShapeObjTableSelCell");
-                TryAction("TableColEnd");
-                TryAction("TableColPageDown");
-
-                if (IsKeyIndicatorCell("A1"))
-                    TryAction("Cancel");
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private bool TryEnterTableBySelection()
-        {
-            EnsureCaretInTableCell();
-
-            TryAction("TableColEnd");
-            TryAction("TableColPageDown");
-
-            if (IsKeyIndicatorCell("A1"))
-                TryAction("Cancel");
-
-            return true;
         }
 
         private bool IsKeyIndicatorCell(string cell)
@@ -409,20 +375,23 @@ namespace Eum.Hwp
             }
         }
 
+        /// <summary>
+        /// 표 셀 안에 커서가 위치하도록 시도
+        /// </summary>
+        /// <returns></returns>
         private bool EnsureCaretInTableCell()
         {
-            if (TryAction("ShapeObjTableSelCell"))
+            //if (TryAction("ShapeObjTableSelCell")) return true;
+            try
             {
-                if (IsKeyIndicatorCell("A1"))
-                    TryAction("Cancel");
-                return true;
+                _hwp.Run("ShapeObjTableSelCell");
+            }
+            catch
+            {
+                return false;
             }
 
-            if (TryAction("TableColBegin")) return true;
-            if (TryAction("TableRightCell")) return true;
-            if (TryAction("TableLeftCell")) return true;
-
-            return false;
+            return true;
         }
 
         private void ReplaceCurrentCellText(string value)
@@ -686,18 +655,31 @@ namespace Eum.Hwp
         private void CreateTable(int rows, int cols)
         {
             _hwp.HAction.GetDefault("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+
             _hwp.HParameterSet.HTableCreation.Rows = rows;
             _hwp.HParameterSet.HTableCreation.Cols = cols;
+
+            _hwp.HParameterSet.HTableCreation.WidthType = 2;    // 너비를 내용에 맞게 자동 조절
+            _hwp.HParameterSet.HTableCreation.HeightType = 0;   // 높이를 자동으로 조절
+
             _hwp.HAction.Execute("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
         }
 
         // 표 만들기 (줄, 칸, 가로크기, 세로크기)
-        public void CreateTable(int row, int column, double width, double height)
+        public void CreateTable(int rows, int cols, double width, double height)
         {
-            _hwp.HAction.GetDefault("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+            try
+            {
+                CreateTable(rows, cols);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("표 생성 실패", ex);
+            }   
+            //_hwp.HAction.GetDefault("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
 
-            _hwp.HParameterSet.HTableCreation.Rows = row;
-            _hwp.HParameterSet.HTableCreation.Cols = column;
+            //_hwp.HParameterSet.HTableCreation.Rows = rows;
+            //_hwp.HParameterSet.HTableCreation.Cols = cols;
 
             //_hwp.HParameterSet.HTableCreation.WidthType = 2; ;
             //_hwp.HParameterSet.HTableCreation.HeightType = 1; ;
@@ -720,7 +702,7 @@ namespace Eum.Hwp
             //_hwp.HParameterSet.HTableCreation.TableProperties.OutsideMarginBottom = _hwp.MiliToHwpUnit(0);
             //_hwp.HParameterSet.HTableCreation.TableProperties.TreatAsChar = 1;       //  # ;글자처럼 취급
 
-            _hwp.HAction.Execute("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+            //_hwp.HAction.Execute("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
         }
 
 

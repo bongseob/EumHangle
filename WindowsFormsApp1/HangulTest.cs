@@ -59,24 +59,8 @@ namespace WindowsFormsApp1
         
         private void Form1_Load(object sender, EventArgs e)
         {
-            RegisterSecurityModule();
             // 한글 파일 열 때 경고문 출현 방지 (레지스트리에 보안모듈 추가)
-            //string checkFile = Application.StartupPath + @"\FilePathCheckerModuleExample.dll";
-            //if (!System.IO.File.Exists(checkFile))
-            //{
-            //    MessageBox.Show("보안 모듈 파일이 존재하지 않습니다: " + checkFile, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //    return;
-            //}
-
-            //RegistryKey key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules", true);
-            //if (key == null)
-            //{
-            //    key = Registry.CurrentUser.CreateSubKey(@"SOFTWARE\HNC\HwpAutomation\Modules");
-            //}
-            //if (key.GetValue("FilePathCheckerModuleExample") == null)
-            //{
-            //    key.SetValue("FilePathCheckerModuleExample", Application.StartupPath + @"\FilePathCheckerModuleExample.dll");
-            //}
+            RegisterSecurityModule();
         }
 
         /// <summary>
@@ -246,7 +230,11 @@ namespace WindowsFormsApp1
         private void btnCreateTable_Click(object sender, EventArgs e)
         {
             if (!IsDocumentReady()) return;
-            _hwpDocument.CreateTable(int.Parse(txtTableRows.Text), int.Parse(txtTableRows.Text), 1, 1);
+            //_hwpDocument.CreateTable(int.Parse(txtTableRows.Text), int.Parse(txtTableRows.Text), 1, 1);
+            //int rows = tableData.GetLength(0);
+            //int cols = tableData.GetLength(1);
+
+            _hwpDocument.CreateTable(5, 5, 1, 1);
         }
 
         private void btnSetTableCell_Click(object sender, EventArgs e)

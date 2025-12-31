@@ -273,7 +273,7 @@
             this.groupBox4.Size = new System.Drawing.Size(350, 180);
             this.groupBox4.TabIndex = 8;
             this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Table Operations";
+            this.groupBox4.Text = "표기능";
             // 
             // btnSetTableCell
             // 
@@ -281,7 +281,7 @@
             this.btnSetTableCell.Name = "btnSetTableCell";
             this.btnSetTableCell.Size = new System.Drawing.Size(100, 23);
             this.btnSetTableCell.TabIndex = 13;
-            this.btnSetTableCell.Text = "Set Cell Text";
+            this.btnSetTableCell.Text = "셀에값입력";
             this.btnSetTableCell.UseVisualStyleBackColor = true;
             this.btnSetTableCell.Click += new System.EventHandler(this.btnSetTableCell_Click);
             // 
@@ -359,7 +359,7 @@
             this.btnCreateTable.Name = "btnCreateTable";
             this.btnCreateTable.Size = new System.Drawing.Size(100, 23);
             this.btnCreateTable.TabIndex = 4;
-            this.btnCreateTable.Text = "Create Table";
+            this.btnCreateTable.Text = "표 만들기";
             this.btnCreateTable.UseVisualStyleBackColor = true;
             this.btnCreateTable.Click += new System.EventHandler(this.btnCreateTable_Click);
             // 
@@ -405,7 +405,7 @@
             this.groupBox5.Size = new System.Drawing.Size(250, 60);
             this.groupBox5.TabIndex = 9;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Image Operations";
+            this.groupBox5.Text = "그림기능";
             // 
             // btnInsertImage
             // 
@@ -413,7 +413,7 @@
             this.btnInsertImage.Name = "btnInsertImage";
             this.btnInsertImage.Size = new System.Drawing.Size(110, 23);
             this.btnInsertImage.TabIndex = 0;
-            this.btnInsertImage.Text = "Insert Image";
+            this.btnInsertImage.Text = "그림추가";
             this.btnInsertImage.UseVisualStyleBackColor = true;
             this.btnInsertImage.Click += new System.EventHandler(this.btnInsertImage_Click);
             // 
