@@ -281,45 +281,49 @@ namespace WindowsFormsApp1
             if (!IsDocumentReady()) return;
 
             // 제목 일자
-            _hwpDocument.ReplaceAll("[E_제목일자]", "2025.12.31");
+            제목일자("2025.12.31");
+
+            // 수입지출특이사항
+            수입지출특이사항();
 
             // [표1] 총괄 현황
-            //총괄현황();
+            총괄현황();
 
             // [표2] 조기지급 현황
-            //조기지급현황();
+            조기지급현황();
 
             // 선지급 미상환 잔액
-            
+            선지급미상환잔액();
+
             // [표3] 세부 현황
-            //세부현황();
+            세부현황();
             
             // [표4] 자금예치 현황
-            //자금예치현황();
+            자금예치현황();
 
             // [표5] 당원수지현황당월
-            //당월수지현황당월();
+            당월수지현황당월();
 
             // [표6] 당기수지현황누적
-            //당기수지현황누적();
+            당기수지현황누적();
 
             // [표7] 누적수지현황
-            //누적수지현황();
+            누적수지현황();
 
             // [표8~표17] 연도별월별재정현황 
-            //연도별월별재정현황(8);  // 표8    
-            //연도별월별재정현황(9);  // 표9
-            //연도별월별재정현황(10); // 표10
-            //연도별월별재정현황(11); // 표11
-            //연도별월별재정현황(12); // 표12
-            //연도별월별재정현황(13); // 표13
-            //연도별월별재정현황(14); // 표14
-            //연도별월별재정현황(15); // 표15
-            //연도별월별재정현황(16); // 표16
-            //연도별월별재정현황(17); // 표17
+            연도별월별재정현황(8);  // 표8    
+            연도별월별재정현황(9);  // 표9
+            연도별월별재정현황(10); // 표10
+            연도별월별재정현황(11); // 표11
+            연도별월별재정현황(12); // 표12
+            연도별월별재정현황(13); // 표13
+            연도별월별재정현황(14); // 표14
+            연도별월별재정현황(15); // 표15
+            연도별월별재정현황(16); // 표16
+            연도별월별재정현황(17); // 표17
 
             // [표18] 월별보험급여비수입현황비교 
-            //월별보험급여비수입현황비교();
+            월별보험급여비수입현황비교();
 
             // [표19] 월별보험급여비지출현황비교 
             월별보험급여비지출현황비교();
@@ -332,22 +336,17 @@ namespace WindowsFormsApp1
             string p3 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림3_보험급여비지출현황.png";
             string p4 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림4_보험급여비수입현황.png";
 
-            // 그림1
-            _hwpDocument.MoveToField("그림1");
-            _hwpDocument.InsertImage(p1);
+            // 그림1 월별보험급여비지출현황
+            그림추가("그림1", p1);
 
-            // 그림2
-            _hwpDocument.MoveToField("그림2");
-            _hwpDocument.InsertImage(p2);
+            // 그림2 일자별보험급여비현황
+            그림추가("그림2", p2);
 
-            // 그림3
-            _hwpDocument.MoveToField("그림3");
-            //_hwpDocument.RunActionAny("DeleteBack");
-            _hwpDocument.InsertImage(p3);
+            // 그림3 보험급여비지출현황
+            그림추가("그림3", p3);
 
-            // 그림4
-            _hwpDocument.MoveToField("그림4");
-            _hwpDocument.InsertImage(p4);
+            // 그림4 보험급여비수입현황
+            그림추가("그림4", p4);
 
         }
 
@@ -356,6 +355,33 @@ namespace WindowsFormsApp1
             ChageDocument();
         }
 
+        /// <summary>
+        /// 제목일자
+        /// </summary>
+        /// <param name="strdate"></param>
+        private void 제목일자(string strdate)
+        {
+            _hwpDocument.ReplaceAll("[E_제목일자]", strdate);
+        }
+
+        /// <summary>
+        /// 수입지출특이사항
+        /// </summary>
+        private void 수입지출특이사항()
+        {
+            _hwpDocument.ReplaceAll("[E_보험료전월수입]", "7조 25억원");
+            _hwpDocument.ReplaceAll("[E_보험료수입차액]", "5,056억 원 증가");
+            _hwpDocument.ReplaceAll("[E_보험급여비전월지출]", "7조 8,578억원");
+            _hwpDocument.ReplaceAll("[E_보험급여비차액]", "1조 6,971억 원 증가");
+        }
+
+        /// <summary>
+        /// 선지급미상환잔액
+        /// </summary>
+        private void 선지급미상환잔액()
+        {
+            _hwpDocument.ReplaceAll("[E_선지급미상환잔액]", "(코로나19) 3억 원");
+        }
         /// <summary>
         /// [표1] 총괄현황
         /// </summary>
@@ -947,6 +973,12 @@ namespace WindowsFormsApp1
                 }
             }
 
+        }
+
+        private void 그림추가(string field, string imgPath)
+        {
+            _hwpDocument.MoveToField(field);
+            _hwpDocument.InsertImage(imgPath);
         }
 
     }
