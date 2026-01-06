@@ -65,6 +65,7 @@
             this.btnInsertImage = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -118,6 +119,8 @@
             // btnSaveAsDistribution
             // 
             this.btnSaveAsDistribution.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSaveAsDistribution.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnSaveAsDistribution.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSaveAsDistribution.ForeColor = System.Drawing.Color.White;
             this.btnSaveAsDistribution.Location = new System.Drawing.Point(130, 60);
             this.btnSaveAsDistribution.Name = "btnSaveAsDistribution";
@@ -130,6 +133,8 @@
             // btnSaveAsPdf
             // 
             this.btnSaveAsPdf.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSaveAsPdf.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnSaveAsPdf.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSaveAsPdf.ForeColor = System.Drawing.Color.White;
             this.btnSaveAsPdf.Location = new System.Drawing.Point(9, 60);
             this.btnSaveAsPdf.Name = "btnSaveAsPdf";
@@ -142,6 +147,8 @@
             // btnOpenDocument
             // 
             this.btnOpenDocument.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnOpenDocument.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnOpenDocument.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnOpenDocument.ForeColor = System.Drawing.Color.White;
             this.btnOpenDocument.Location = new System.Drawing.Point(130, 22);
             this.btnOpenDocument.Name = "btnOpenDocument";
@@ -154,6 +161,8 @@
             // btnNewDocument
             // 
             this.btnNewDocument.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnNewDocument.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnNewDocument.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnNewDocument.ForeColor = System.Drawing.Color.White;
             this.btnNewDocument.Location = new System.Drawing.Point(9, 22);
             this.btnNewDocument.Name = "btnNewDocument";
@@ -178,6 +187,8 @@
             // btnInsertText
             // 
             this.btnInsertText.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnInsertText.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnInsertText.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnInsertText.ForeColor = System.Drawing.Color.White;
             this.btnInsertText.Location = new System.Drawing.Point(157, 59);
             this.btnInsertText.Name = "btnInsertText";
@@ -221,6 +232,8 @@
             // btnReplaceAll
             // 
             this.btnReplaceAll.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnReplaceAll.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnReplaceAll.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnReplaceAll.ForeColor = System.Drawing.Color.White;
             this.btnReplaceAll.Location = new System.Drawing.Point(136, 98);
             this.btnReplaceAll.Name = "btnReplaceAll";
@@ -290,6 +303,8 @@
             // btnSetTableCell
             // 
             this.btnSetTableCell.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnSetTableCell.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnSetTableCell.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSetTableCell.ForeColor = System.Drawing.Color.White;
             this.btnSetTableCell.Location = new System.Drawing.Point(232, 144);
             this.btnSetTableCell.Name = "btnSetTableCell";
@@ -370,6 +385,8 @@
             // btnCreateTable
             // 
             this.btnCreateTable.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnCreateTable.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnCreateTable.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCreateTable.ForeColor = System.Drawing.Color.White;
             this.btnCreateTable.Location = new System.Drawing.Point(232, 30);
             this.btnCreateTable.Name = "btnCreateTable";
@@ -426,6 +443,8 @@
             // btnInsertImage
             // 
             this.btnInsertImage.BackColor = System.Drawing.SystemColors.Highlight;
+            this.btnInsertImage.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.btnInsertImage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnInsertImage.ForeColor = System.Drawing.Color.White;
             this.btnInsertImage.Location = new System.Drawing.Point(9, 22);
             this.btnInsertImage.Name = "btnInsertImage";
@@ -439,11 +458,26 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.SystemColors.Highlight;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.Silver;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.ForeColor = System.Drawing.Color.White;
+            this.button1.Location = new System.Drawing.Point(598, 286);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(100, 23);
+            this.button1.TabIndex = 14;
+            this.button1.Text = "일일재정현황";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // HangulTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox3);
@@ -506,6 +540,7 @@
         private System.Windows.Forms.Button btnInsertImage;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button button1;
     }
 }
 

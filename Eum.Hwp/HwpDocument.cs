@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Eum.Hwp
 {
@@ -37,11 +38,34 @@ namespace Eum.Hwp
             _hwp.HAction.Execute("FileSaveAs", _hwp.HParameterSet.HFileOpenSave.HSet);
         }
 
-        public void InsertText(string text)
+        public void InsertText(string text, bool bSelect=false)
         {
-            _hwp.HAction.GetDefault("InsertText", _hwp.HParameterSet.HInsertText.HSet);
-            _hwp.HParameterSet.HInsertText.Text = text;
-            _hwp.HAction.Execute("InsertText", _hwp.HParameterSet.HInsertText.HSet);
+            if (bSelect)
+            {
+                _hwp.HAction.Run("Cancel");
+                _hwp.HAction.Run("MoveLineBegin");
+                _hwp.HAction.Run("MoveSelLineEnd");
+                _hwp.HAction.Run("Delete");
+
+                _hwp.HAction.GetDefault("InsertText", _hwp.HParameterSet.HInsertText.HSet);
+                _hwp.HParameterSet.HInsertText.Text = text;
+                _hwp.HAction.Execute("InsertText", _hwp.HParameterSet.HInsertText.HSet);
+
+            }
+            else
+            {
+                _hwp.HAction.GetDefault("InsertText", _hwp.HParameterSet.HInsertText.HSet);
+                _hwp.HParameterSet.HInsertText.Text = text;
+                _hwp.HAction.Execute("InsertText", _hwp.HParameterSet.HInsertText.HSet);
+            }
+        }
+
+        public void MoveToField(string fieldName)
+        {
+            bool text = true;
+            bool start = true;
+            bool select = true;
+            _hwp.MoveToField(fieldName, text, start, select);
         }
 
         /// <summary>
@@ -53,18 +77,14 @@ namespace Eum.Hwp
         /// </summary>
         public void InsertImage(string imagePath)
         {
-            //_hwp.InsertPicture(imagePath, true, 0);
-            //_hwp.InsertPicture(imagePath, true, 0, 0, 0, 0);
-            bool embedded = true;
-            int sizeoption = 2;
-            bool reverse = false;
-            bool watermark = false;
-            int effect = 0;
-            int mmPicWidth = 0;
-            int mmPicHeight = 0;
+            bool embedded = true;    // 이미지 파일을 문서내에 포함할지 여부 (True/False). 생략하면 true
+            int sizeoption = 2;      // 삽입할 그림의 크기 옵션 0: 원본 크기 1: 사용자가 지정한 크기 (mmPicWidth, mmPicHeight 값 사용) 2:문서에 맞게 자동 조절
+            bool reverse = false;    // 이미지 반전 유무
+            bool watermark = false;  // 워터마크 여부
+            int effect = 0;          // 이미지 효과 0: 없음
+            int mmPicWidth = 0;      // 그림 가로 크기 (sizeoption이 1일 때 사용, 단위: mm)
+            int mmPicHeight = 0;     // 그림 세로 크기 (sizeoption이 1일 때 사용, 단위: mm)
             _hwp.InsertPicture(imagePath, embedded, sizeoption, reverse, watermark, effect, mmPicWidth, mmPicHeight);
-
-            //_hwp.HAction.Execute("PictureInsertDialog", _hwp.HParameterSet.HInsertText.HSet);
         }
 
         public void DeleteTable(int tableIndex)
@@ -120,7 +140,7 @@ namespace Eum.Hwp
 
             MoveToTableByIndex(tableIndex);
             MoveToCell(row, col);
-            InsertText(text);
+            InsertText(text, true);
 
         }
 
@@ -402,8 +422,18 @@ namespace Eum.Hwp
             try
             {
                 string cell = GetCtrlName();
-                cell = cell.Split('(', ')')[1];
-                return cell;
+                if (string.IsNullOrEmpty(cell))
+                    return null;
+
+                int open = cell.IndexOf('(');
+                if (open < 0)
+                    return null;
+
+                int close = cell.IndexOf(')', open + 1);
+                if (close < 0 || close <= open + 1)
+                    return null;
+
+                return cell.Substring(open + 1, close - open - 1);
             }
             catch 
             { 
@@ -440,7 +470,6 @@ namespace Eum.Hwp
         private void ClearCurrentCellText()
         {
             TryAction("MoveLineBegin");
-            TryAction("Select");
             TryAction("MoveSelLineEnd");
             TryAction("Delete");
             TryAction("Cancel");
@@ -642,7 +671,7 @@ namespace Eum.Hwp
         }
 
         // 액션명이 명확하지 않을 때 후보군을 순차 시도
-        private void RunActionAny(params string[] names)
+        public void RunActionAny(params string[] names)
         {
             foreach (var name in names)
             {
@@ -652,25 +681,25 @@ namespace Eum.Hwp
         }
 
         // 셀 이동: 셀 오른쪽
-        private void MoveNextCell()
+        public void MoveNextCell()
         {
             TryAction("TableRightCell");
         }
 
         // 셀 이동: 셀 왼쪽
-        private void MoveLeftCell()
+        public void MoveLeftCell()
         {
             TryAction("TableLeftCell");
         }
 
         // 셀 이동: 셀 위로
-        private void MoveUpCell()
+        public void MoveUpCell()
         {
             TryAction("TableUpperCell");
         }
 
         // 셀 이동: 셀 아래로
-        private void MoveDownCell()
+        public void MoveDownCell()
         {
             TryAction("TableLowerCell");
         }
@@ -688,18 +717,45 @@ namespace Eum.Hwp
             _hwp.HAction.Run("BreakPara");
         }
 
+        private void EnsureCaretInBody()
+        {
+            // Clear selection and exit table/object mode if possible.
+            TryAction("Cancel");
+            TryAction("Close");
+            TryAction("CloseEx");
+            // Force caret into a guaranteed editable body position.
+            TryAction("MoveDocBegin");
+            TryAction("MoveDocEnd");
+        }
+
         // 표 생성
         private void CreateTable(int rows, int cols)
         {
-            _hwp.HAction.GetDefault("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+            if (rows <= 0 || cols <= 0)
+                throw new ArgumentOutOfRangeException("rows/cols must be positive.");
 
-            _hwp.HParameterSet.HTableCreation.Rows = rows;
-            _hwp.HParameterSet.HTableCreation.Cols = cols;
+            EnsureCaretInBody();
 
-            _hwp.HParameterSet.HTableCreation.WidthType = 2;    // 너비를 내용에 맞게 자동 조절
-            _hwp.HParameterSet.HTableCreation.HeightType = 0;   // 높이를 자동으로 조절
+            try
+            {
+                _hwp.HAction.GetDefault("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
 
-            _hwp.HAction.Execute("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+                _hwp.HParameterSet.HTableCreation.Rows = rows;
+                _hwp.HParameterSet.HTableCreation.Cols = cols;
+
+                _hwp.HParameterSet.HTableCreation.WidthType = 2;    // 너비를 내용에 맞게 자동 조절
+                _hwp.HParameterSet.HTableCreation.HeightType = 0;   // 높이를 자동으로 조절
+
+                _hwp.HAction.Execute("TableCreate", _hwp.HParameterSet.HTableCreation.HSet);
+            }
+            catch (Exception ex)
+            {
+                string ctrlName = GetCtrlName() ?? "?";
+                string cellAddr = GetCellAddr() ?? "?";
+                string selectedCtrlId = TryGetCurSelectedCtrlId(out string id) ? id : "?";
+                Debug.WriteLine($"[HWP] TableCreate failed. rows={rows}, cols={cols}, ctrlName={ctrlName}, selectedCtrlId={selectedCtrlId}, cell={cellAddr}. {ex}");
+                throw;
+            }
         }
 
         // 표 만들기 (줄, 칸, 가로크기, 세로크기)
@@ -764,7 +820,7 @@ namespace Eum.Hwp
             }
         }
 
-        private void MoveOutOfTable()
+        public void MoveOutOfTable()
         {
             RunActionAny("Close", "CloseEx");
         }
