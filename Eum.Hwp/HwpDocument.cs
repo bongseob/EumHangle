@@ -79,7 +79,6 @@ namespace Eum.Hwp
         {
             RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample");
 
-            //_hwp.SetMessageBoxMode(0x00000010); // 메시지 박스 모드 설정
             bool embedded = true;    // 이미지 파일을 문서내에 포함할지 여부 (True/False). 생략하면 true
             int sizeoption = 2;      // 삽입할 그림의 크기 옵션 0: 원본 크기 1: 사용자가 지정한 크기 (mmPicWidth, mmPicHeight 값 사용) 2:문서에 맞게 자동 조절
             bool reverse = false;    // 이미지 반전 유무
