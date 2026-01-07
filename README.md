@@ -65,3 +65,6 @@
             _hwp.RegisterModule(dllName, moduleName);
         }
 ```
+RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample"); 
+위 함수의 인자값은 자신의 레지스트리 등록 내용과 일치 시켜야 한다.
+<img width="1312" height="342" alt="image" src="https://github.com/user-attachments/assets/c1539ede-5c3a-4211-8a4a-7105ca91672a" />
