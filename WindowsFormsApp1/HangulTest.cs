@@ -18,10 +18,10 @@ namespace WindowsFormsApp1
 {
     public partial class HangulTest : Form
     {
-        [DllImport("ole32.dll")]
-        static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
-        [DllImport("ole32.dll")]
-        private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable prot);
+        //[DllImport("ole32.dll")]
+        //static extern int CreateBindCtx(uint reserved, out IBindCtx ppbc);
+        //[DllImport("ole32.dll")]
+        //private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable prot);
 
         private HwpDocument _hwpDocument;
         private HwpApplication _hwpApplication;
@@ -87,6 +87,7 @@ namespace WindowsFormsApp1
                     if (key != null)
                     {
                         key.SetValue("FilePathCheckerModuleExample", executablePath, RegistryValueKind.String);
+                        key.SetValue("FilePathCheckDLL", executablePath, RegistryValueKind.String);
                     }
                 }
             }
@@ -295,35 +296,35 @@ namespace WindowsFormsApp1
             // 선지급 미상환 잔액
             선지급미상환잔액();
 
-            // [표3] 세부 현황
-            세부현황();
-            
-            // [표4] 자금예치 현황
-            자금예치현황();
+            //// [표3] 세부 현황
+            //세부현황();
 
-            // [표5] 당원수지현황당월
-            당월수지현황당월();
+            //// [표4] 자금예치 현황
+            //자금예치현황();
 
-            // [표6] 당기수지현황누적
-            당기수지현황누적();
+            //// [표5] 당원수지현황당월
+            //당월수지현황당월();
 
-            // [표7] 누적수지현황
-            누적수지현황();
+            //// [표6] 당기수지현황누적
+            //당기수지현황누적();
 
-            // [표8~표17] 연도별월별재정현황 
-            연도별월별재정현황(8);  // 표8    
-            연도별월별재정현황(9);  // 표9
-            연도별월별재정현황(10); // 표10
-            연도별월별재정현황(11); // 표11
-            연도별월별재정현황(12); // 표12
-            연도별월별재정현황(13); // 표13
-            연도별월별재정현황(14); // 표14
-            연도별월별재정현황(15); // 표15
-            연도별월별재정현황(16); // 표16
-            연도별월별재정현황(17); // 표17
+            //// [표7] 누적수지현황
+            //누적수지현황();
 
-            // [표18] 월별보험급여비수입현황비교 
-            월별보험급여비수입현황비교();
+            //// [표8~표17] 연도별월별재정현황 
+            //연도별월별재정현황(8);  // 표8    
+            //연도별월별재정현황(9);  // 표9
+            //연도별월별재정현황(10); // 표10
+            //연도별월별재정현황(11); // 표11
+            //연도별월별재정현황(12); // 표12
+            //연도별월별재정현황(13); // 표13
+            //연도별월별재정현황(14); // 표14
+            //연도별월별재정현황(15); // 표15
+            //연도별월별재정현황(16); // 표16
+            //연도별월별재정현황(17); // 표17
+
+            //// [표18] 월별보험급여비수입현황비교 
+            //월별보험급여비수입현황비교();
 
             // [표19] 월별보험급여비지출현황비교 
             월별보험급여비지출현황비교();
@@ -348,6 +349,8 @@ namespace WindowsFormsApp1
             // 그림4 보험급여비수입현황
             그림추가("그림4", p4);
 
+            // 파일 다른이름으로 저장 및 한글 종료
+            파일저장및종료();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -380,7 +383,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void 선지급미상환잔액()
         {
-            _hwpDocument.ReplaceAll("[E_선지급미상환잔액]", "(코로나19) 3억 원");
+            _hwpDocument.ReplaceAll("[E_선지급미상환잔액]", "(장봉섭) 300억 원");
         }
         /// <summary>
         /// [표1] 총괄현황
@@ -396,7 +399,7 @@ namespace WindowsFormsApp1
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("12월말", true);
             _hwpDocument.MoveNextCell();
-            _hwpDocument.InsertText("연간 전망", true);
+            //_hwpDocument.InsertText("연간 전망", true);
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("11월", true);
 
@@ -981,5 +984,13 @@ namespace WindowsFormsApp1
             _hwpDocument.InsertImage(imgPath);
         }
 
+        private void 파일저장및종료()
+        {
+            string savePath = System.IO.Directory.GetCurrentDirectory() + @"\일일재정현황2.hwp";
+            _hwpDocument.SaveAs(savePath);
+
+            _hwpDocument.Close(save: false);
+            _hwpApplication.Quit();
+        }
     }
 }
