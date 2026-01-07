@@ -77,6 +77,8 @@ namespace Eum.Hwp
         /// </summary>
         public void InsertImage(string imagePath)
         {
+            RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample");
+
             //_hwp.SetMessageBoxMode(0x00000010); // 메시지 박스 모드 설정
             bool embedded = true;    // 이미지 파일을 문서내에 포함할지 여부 (True/False). 생략하면 true
             int sizeoption = 2;      // 삽입할 그림의 크기 옵션 0: 원본 크기 1: 사용자가 지정한 크기 (mmPicWidth, mmPicHeight 값 사용) 2:문서에 맞게 자동 조절
@@ -86,6 +88,11 @@ namespace Eum.Hwp
             int mmPicWidth = 0;      // 그림 가로 크기 (sizeoption이 1일 때 사용, 단위: mm)
             int mmPicHeight = 0;     // 그림 세로 크기 (sizeoption이 1일 때 사용, 단위: mm)
             _hwp.InsertPicture(imagePath, embedded, sizeoption, reverse, watermark, effect, mmPicWidth, mmPicHeight);
+        }
+
+        public void RegisterModule(string dllName, string moduleName)
+        {
+            _hwp.RegisterModule(dllName, moduleName);
         }
 
         public void DeleteTable(int tableIndex)

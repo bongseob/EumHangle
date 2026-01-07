@@ -87,7 +87,7 @@ namespace WindowsFormsApp1
                     if (key != null)
                     {
                         key.SetValue("FilePathCheckerModuleExample", executablePath, RegistryValueKind.String);
-                        key.SetValue("FilePathCheckDLL", executablePath, RegistryValueKind.String);
+                        //key.SetValue("FilePathCheckDLL", executablePath, RegistryValueKind.String);
                     }
                 }
             }
