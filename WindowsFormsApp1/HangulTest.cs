@@ -14,6 +14,8 @@ using HwpObjectLib;
 using Microsoft.Win32;
 using Eum.Hwp;
 using System.Diagnostics;
+using Excel = Microsoft.Office.Interop.Excel;
+using System.Net.NetworkInformation;
 
 namespace WindowsFormsApp1
 {
@@ -281,10 +283,15 @@ namespace WindowsFormsApp1
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (_totalSummaryTable == null)
+                throw new InvalidOperationException("차트 생성을 위한 DataTable이 설정되지 않았습니다.");
+
+            SaveChartImage();
+
             Stopwatch sw = Stopwatch.StartNew();
 
             ChageDocument();
-
+            
             sw.Stop();
             Debug.WriteLine($"실행 시간: {sw.ElapsedMilliseconds} ms");
         }
@@ -343,28 +350,28 @@ namespace WindowsFormsApp1
 
             //// 표를 빠져 나와서 다음 작업을 위해 한 줄 내림
             //_hwpDocument.MoveOutOfTable();
+            string outputDir = System.IO.Directory.GetCurrentDirectory();
+            string p1 = System.IO.Path.Combine(outputDir, "그림1_월별보험급여비지출현황.png");
+            string p2 = System.IO.Path.Combine(outputDir, "그림2_일자별보험급여비현황.png");
+            string p3 = System.IO.Path.Combine(outputDir, "그림3_보험급여비지출현황.png");
+            string p4 = System.IO.Path.Combine(outputDir, "그림4_보험급여비수입현황.png");
 
-            //string p1 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림1_월별보험급여비지출현황.png";
-            //string p2 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림2_일자별보험급여비현황.png";
-            //string p3 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림3_보험급여비지출현황.png";
-            //string p4 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림4_보험급여비수입현황.png";
+            // 그림1 월별보험급여비지출현황 (그림 사이즈 지정이면 추가 파라미터로 sizeopt=1, width, height 넣기)
+            그림추가("그림1", p1);
+            //그림추가("그림1", p1, 1, 100, 100);  // 크기지정 예시
 
-            //// 그림1 월별보험급여비지출현황
-            //그림추가("그림1", p1);
+            // 그림2 일자별보험급여비현황
+            그림추가("그림2", p2);
 
-            //// 그림2 일자별보험급여비현황
-            //그림추가("그림2", p2);
+            // 그림3 보험급여비지출현황
+            그림추가("그림3", p3);
 
-            //// 그림3 보험급여비지출현황
-            //그림추가("그림3", p3);
+            // 그림4 보험급여비수입현황
+            그림추가("그림4", p4);
 
-            //// 그림4 보험급여비수입현황
-            //그림추가("그림4", p4);
-            
             //// 파일 다른이름으로 저장 및 한글 종료
             //파일저장및종료();
         }
-
 
         /// <summary>
         /// 문서에 사용될 DataTable 삽입
@@ -799,10 +806,20 @@ namespace WindowsFormsApp1
 
         }
 
-        private void 그림추가(string field, string imgPath)
+        /// <summary>
+        ///  그림삽입
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="imgPath"></param>
+        /// <param name="sizeopt"> 1:그림 크기 지정, 2: 화면 크기</param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        private void 그림추가(string field, string imgPath, int sizeopt = 2, int w = 0, int h = 0)
         {
+            if (string.IsNullOrEmpty(field)) return;
+
             _hwpDocument.MoveToField(field);
-            _hwpDocument.InsertImage(imgPath);
+            _hwpDocument.InsertImage(imgPath, sizeopt, w, h);
         }
 
         private void 파일저장및종료()
@@ -812,6 +829,242 @@ namespace WindowsFormsApp1
 
             _hwpDocument.Close(save: false);
             _hwpApplication.Quit();
+        }
+
+        /// <summary>
+        /// 엑셀을 이용해 그린 그래프 이미지 저장
+        /// </summary>
+        /// <returns></returns>
+        private string SaveChartImage()
+        {
+            string outputDir = System.IO.Directory.GetCurrentDirectory();
+            System.IO.Directory.CreateDirectory(outputDir);
+
+            var charts = new List<(string Title, string FileName, DataTable Data, Action<Excel.Chart> Format)>
+            {
+                ("월별보험급여비지출현황", "그림1_월별보험급여비지출현황.png", CreateMonthlyExpenseWithAverage(), FormatMonthlyExpenseChart),
+                ("일자별보험급여비현황", "그림2_일자별보험급여비현황.png", CreateDailyExpense(), FormatDailyExpenseChart),
+                ("보험급여비지출현황", "그림3_보험급여비지출현황.png", CreateYearlySeries("지출"), FormatMultiYearExpenseChart),
+                ("보험급여비수입현황", "그림4_보험급여비수입현황.png", CreateYearlySeries("수입"), FormatMultiYearIncomeChart)
+            };
+
+            Excel.Application excel = null;
+            Excel.Workbook workbook = null;
+            Excel.Worksheet sheet = null;
+
+            try
+            {
+                excel = new Excel.Application { Visible = false, DisplayAlerts = false };
+                workbook = excel.Workbooks.Add();
+
+                for (int i = 0; i < charts.Count; i++)
+                {
+                    var spec = charts[i];
+                    sheet = i == 0 ? (Excel.Worksheet)workbook.Worksheets[1]
+                                   : (Excel.Worksheet)workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
+
+                    WriteTable(sheet, spec.Data);
+
+                    Excel.Range dataRange = sheet.Range[
+                        sheet.Cells[1, 1],
+                        sheet.Cells[spec.Data.Rows.Count + 1, spec.Data.Columns.Count]
+                    ];
+
+                    Excel.ChartObject chartObject = sheet.ChartObjects().Add(20, 20, 960, 360);
+                    Excel.Chart chart = chartObject.Chart;
+                    chart.SetSourceData(dataRange);
+                    chart.HasTitle = false;
+                    chart.HasLegend = true;
+
+                    spec.Format(chart);
+
+                    string outputPath = System.IO.Path.Combine(outputDir, spec.FileName);
+                    chart.Export(outputPath, "PNG", false);
+
+                    Marshal.FinalReleaseComObject(chart);
+                    Marshal.FinalReleaseComObject(chartObject);
+                    Marshal.FinalReleaseComObject(sheet);
+                    sheet = null;
+                }
+            }
+            finally
+            {
+                if (sheet != null) Marshal.FinalReleaseComObject(sheet);
+
+                if (workbook != null)
+                {
+                    workbook.Close(false);
+                    Marshal.FinalReleaseComObject(workbook);
+                }
+
+                if (excel != null)
+                {
+                    excel.Quit();
+                    Marshal.FinalReleaseComObject(excel);
+                }
+            }
+
+            return System.IO.Path.Combine(outputDir, "그림1_월별보험급여비지출현황.png");
+        }
+
+        private static void WriteTable(Excel.Worksheet sheet, DataTable data)
+        {
+            for (int c = 0; c < data.Columns.Count; c++)
+            {
+                sheet.Cells[1, c + 1] = data.Columns[c].ColumnName;
+            }
+
+            for (int r = 0; r < data.Rows.Count; r++)
+            {
+                for (int c = 0; c < data.Columns.Count; c++)
+                {
+                    sheet.Cells[r + 2, c + 1] = Convert.ToString(data.Rows[r][c]) ?? string.Empty;
+                }
+            }
+        }
+
+        private static DataTable CreateMonthlyExpenseWithAverage()
+        {
+            DataTable data = new DataTable();
+            data.Columns.Add("월");
+            data.Columns.Add("지출액");
+            data.Columns.Add("누적 월 평균");
+
+            int[] monthly = new int[] { 79086, 81557, 81853, 81138, 81575, 79151, 86127, 81500, 103991, 85630, 78578, 83737 };
+            int running = 0;
+            for (int i = 0; i < monthly.Length; i++)
+            {
+                running += monthly[i];
+                int avg = running / (i + 1);
+                data.Rows.Add($"{i + 1}월", monthly[i], avg);
+            }
+
+            return data;
+        }
+
+        private static DataTable CreateDailyExpense()
+        {
+            DataTable data = new DataTable();
+            data.Columns.Add("일자");
+            data.Columns.Add("금액");
+
+            string[] days = { "01일", "02일", "03일", "04일", "05일", "08일", "09일", "10일", "11일", "12일", "15일", "16일", "17일", "18일", "19일", "22일", "23일", "24일", "26일", "29일", "30일", "31일" };
+            int[] values = { 2805, 2069, 1795, 2208, 3331, 6632, 11448, 9556, 5979, 5402, 5069, 3873, 3321, 2488, 3375, 3256, 2639, 2798, 4337, 3525, 2843, 6801 };
+
+            for (int i = 0; i < days.Length; i++)
+            {
+                data.Rows.Add(days[i], values[i]);
+            }
+
+            return data;
+        }
+
+        private static DataTable CreateYearlySeries(string kind)
+        {
+            DataTable data = new DataTable();
+            data.Columns.Add("월");
+
+            for (int year = 2016; year <= 2025; year++)
+            {
+                data.Columns.Add($"{year % 100}년{kind}");
+            }
+
+            for (int m = 1; m <= 12; m++)
+            {
+                DataRow row = data.NewRow();
+                row[0] = $"{m}월";
+                for (int y = 0; y < 10; y++)
+                {
+                    int year = 2016 + y;
+                    int baseValue = kind == "지출" ? 40000 : 35000;
+                    int yearStep = kind == "지출" ? 3000 : 2500;
+                    double wave = Math.Sin((m + y) * 0.6) * 2500;
+                    int value = (int)(baseValue + (y * yearStep) + wave);
+
+                    if (year == 2025 && kind == "지출" && m == 9)
+                        value = 103991;
+                    if (year == 2025 && kind == "수입" && m == 5)
+                        value = 92887;
+
+                    row[y + 1] = value;
+                }
+                data.Rows.Add(row);
+            }
+
+            return data;
+        }
+
+        private static void FormatMonthlyExpenseChart(Excel.Chart chart)
+        {
+            chart.ChartType = Excel.XlChartType.xlColumnClustered;
+            Excel.SeriesCollection series = (Excel.SeriesCollection)chart.SeriesCollection();
+            if (series.Count >= 2)
+            {
+                Excel.Series avg = series.Item(2);
+                avg.ChartType = Excel.XlChartType.xlLine;
+                avg.MarkerStyle = Excel.XlMarkerStyle.xlMarkerStyleCircle;
+            }
+
+            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+
+            Excel.Axis yAxis = (Excel.Axis)chart.Axes(Excel.XlAxisType.xlValue);
+            yAxis.MinimumScale = 50000;
+            yAxis.MaximumScale = 110000;
+            yAxis.MajorUnit = 10000;
+
+            AddValueLabels(series);
+        }
+
+        private static void FormatDailyExpenseChart(Excel.Chart chart)
+        {
+            chart.ChartType = Excel.XlChartType.xlColumnClustered;
+            chart.HasLegend = false;
+
+            Excel.Axis yAxis = (Excel.Axis)chart.Axes(Excel.XlAxisType.xlValue);
+            yAxis.MinimumScale = 0;
+            yAxis.MaximumScale = 18000;
+            yAxis.MajorUnit = 3000;
+
+            Excel.SeriesCollection series = (Excel.SeriesCollection)chart.SeriesCollection();
+            AddValueLabels(series);
+        }
+
+        private static void FormatMultiYearExpenseChart(Excel.Chart chart)
+        {
+            chart.ChartType = Excel.XlChartType.xlLine;
+            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionBottom;
+
+            Excel.Axis yAxis = (Excel.Axis)chart.Axes(Excel.XlAxisType.xlValue);
+            yAxis.MinimumScale = 20000;
+            yAxis.MaximumScale = 110000;
+            yAxis.MajorUnit = 10000;
+
+            Excel.SeriesCollection series = (Excel.SeriesCollection)chart.SeriesCollection();
+            AddValueLabels(series);
+        }
+
+        private static void FormatMultiYearIncomeChart(Excel.Chart chart)
+        {
+            chart.ChartType = Excel.XlChartType.xlLine;
+            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionBottom;
+
+            Excel.Axis yAxis = (Excel.Axis)chart.Axes(Excel.XlAxisType.xlValue);
+            yAxis.MinimumScale = 25000;
+            yAxis.MaximumScale = 95000;
+            yAxis.MajorUnit = 10000;
+
+            Excel.SeriesCollection series = (Excel.SeriesCollection)chart.SeriesCollection();
+            AddValueLabels(series);
+        }
+
+        private static void AddValueLabels(Excel.SeriesCollection series)
+        {
+            for (int i = 1; i <= series.Count; i++)
+            {
+                Excel.Series s = series.Item(i);
+                s.HasDataLabels = true;
+                //s.DataLabels.ShowValue = true;
+            }
         }
     }
 }
