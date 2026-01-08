@@ -13,6 +13,7 @@ using System.Runtime.InteropServices.ComTypes;
 using HwpObjectLib;
 using Microsoft.Win32;
 using Eum.Hwp;
+using System.Diagnostics;
 
 namespace WindowsFormsApp1
 {
@@ -287,20 +288,20 @@ namespace WindowsFormsApp1
             // 수입지출특이사항
             수입지출특이사항();
 
-            // [표1] 총괄 현황
+            //// [표1] 총괄 현황
             총괄현황();
 
-            // [표2] 조기지급 현황
-            조기지급현황();
+            //// [표2] 조기지급 현황
+            //조기지급현황();
 
-            // 선지급 미상환 잔액
-            선지급미상환잔액();
+            //// 선지급 미상환 잔액
+            //선지급미상환잔액();
 
-            //// [표3] 세부 현황
-            //세부현황();
+            // [표3] 세부 현황
+            세부현황();
 
             //// [표4] 자금예치 현황
-            //자금예치현황();
+            자금예치현황();
 
             //// [표5] 당원수지현황당월
             //당월수지현황당월();
@@ -326,36 +327,41 @@ namespace WindowsFormsApp1
             //// [표18] 월별보험급여비수입현황비교 
             //월별보험급여비수입현황비교();
 
-            // [표19] 월별보험급여비지출현황비교 
-            월별보험급여비지출현황비교();
+            //// [표19] 월별보험급여비지출현황비교 
+            //월별보험급여비지출현황비교();
 
-            // 표를 빠져 나와서 다음 작업을 위해 한 줄 내림
-            _hwpDocument.MoveOutOfTable();
+            //// 표를 빠져 나와서 다음 작업을 위해 한 줄 내림
+            //_hwpDocument.MoveOutOfTable();
 
-            string p1 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림1_월별보험급여비지출현황.png";
-            string p2 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림2_일자별보험급여비현황.png";
-            string p3 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림3_보험급여비지출현황.png";
-            string p4 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림4_보험급여비수입현황.png";
+            //string p1 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림1_월별보험급여비지출현황.png";
+            //string p2 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림2_일자별보험급여비현황.png";
+            //string p3 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림3_보험급여비지출현황.png";
+            //string p4 = "E:\\gungangbohum\\WindowsFormsApp1\\WindowsFormsApp1\\bin\\x86\\Debug\\그림4_보험급여비수입현황.png";
 
-            // 그림1 월별보험급여비지출현황
-            그림추가("그림1", p1);
+            //// 그림1 월별보험급여비지출현황
+            //그림추가("그림1", p1);
 
-            // 그림2 일자별보험급여비현황
-            그림추가("그림2", p2);
+            //// 그림2 일자별보험급여비현황
+            //그림추가("그림2", p2);
 
-            // 그림3 보험급여비지출현황
-            그림추가("그림3", p3);
+            //// 그림3 보험급여비지출현황
+            //그림추가("그림3", p3);
 
-            // 그림4 보험급여비수입현황
-            그림추가("그림4", p4);
-
-            // 파일 다른이름으로 저장 및 한글 종료
-            파일저장및종료();
+            //// 그림4 보험급여비수입현황
+            //그림추가("그림4", p4);
+            
+            //// 파일 다른이름으로 저장 및 한글 종료
+            //파일저장및종료();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Stopwatch sw = Stopwatch.StartNew();
+
             ChageDocument();
+            
+            sw.Stop();
+            Debug.WriteLine($"실행 시간: {sw.ElapsedMilliseconds} ms");
         }
 
         /// <summary>
@@ -399,7 +405,6 @@ namespace WindowsFormsApp1
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("12월말", true);
             _hwpDocument.MoveNextCell();
-            //_hwpDocument.InsertText("연간 전망", true);
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("11월", true);
 
@@ -415,134 +420,17 @@ namespace WindowsFormsApp1
 
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
 
-            // 총괄현황 - 수입
-            _hwpDocument.SetTableCellText(tableIndex, 1, 2, "100");  // 전년 11월말
-            for (int i = 0; i < 3; i++)
+            // 총괄 현황 - 내역
+            for (int c = 0; c < 7; c++)
             {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((200 + i * 100).ToString(), true);
+                _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
+                for (int r = 0; r < 10; r++)
+                {
+                    _hwpDocument.MoveDownCell();
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+                }
             }
 
-            _hwpDocument.SetTableCellText(tableIndex, 1, 3, "110");  // 전년 12월말
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((210 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 4, "120");  // 당년 연간 전망
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((220 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 5, "130");  // 당년 전월
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((230 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 6, "140");  // 당년 당월 당일
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((240 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 7, "150");  // 당년 당월 누적
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((250 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 8, "160");  // 당년 연간 누적
-            for (int i = 0; i < 3; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((260 + i * 100).ToString(), true);
-            }
-
-            // 총괄현황 - 지출
-            _hwpDocument.SetTableCellText(tableIndex, 2, 2, "100");  // 전년 11월말
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((200 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 3, "110");  // 전년 12월말
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((210 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 4, "120");  // 당년 연간 전망
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((220 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 5, "130");  // 당년 전월
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((230 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 6, "140");  // 당년 당월 당일
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((240 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 7, "150");  // 당년 당월 누적
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((250 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 8, "160");  // 당년 연간 누적
-            for (int i = 0; i < 4; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((260 + i * 100).ToString(), true);
-            }
-
-            // 총괄현황 - 수지
-            _hwpDocument.SetTableCellText(tableIndex, 3, 2, "100");  // 전년 11월말
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("200", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 3, "110");  // 전년 12월말
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("210", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 4, "120");  // 당년 연간 전망
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("220", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 5, "130");  // 당년 전월
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("230", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 6, "140");  // 당년 당월 당일
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("240", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 7, "150");  // 당년 당월 누적
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("250", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 8, "160");  // 당년 연간 누적
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("260", true);
         }
 
         /// <summary>
@@ -576,219 +464,21 @@ namespace WindowsFormsApp1
             _hwpDocument.MoveNextCell();
             _hwpDocument.MoveUpCell();
             _hwpDocument.InsertText("11월", true);
-
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("12월", true);
             _hwpDocument.MoveDownCell();
-            //_hwpDocument.MoveLeftCell();
-            //_hwpDocument.InsertText("당일", true);
-            //_hwpDocument.MoveNextCell();
-            //_hwpDocument.InsertText("당월 누적", true);
-            //_hwpDocument.MoveNextCell();
-            //_hwpDocument.InsertText("연간 누적", true);
-
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
 
-            // 세부현황 - 수입
-            _hwpDocument.SetTableCellText(tableIndex, 1, 2, "100");  // 전년 11월말
-            for (int i = 0; i < 11; i++)
+            // 세부 현황 - 월별현황
+            for (int c = 0; c < 11; c++)
             {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((200 + i * 100).ToString(), true);
+                _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
+                for (int r = 0; r < 26; r++)
+                {
+                    _hwpDocument.MoveDownCell();
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+                }
             }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 3, "110");  // 전년 12월말
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((210 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 4, "120");  // 당년 연간 전망
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((220 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 5, "130");  // 당년 전월 연간누적 금액
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((230 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 6, "140");  // 당년 전월 연간누적 집행률
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((240 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 7, "150");  // 당년 전월 연간누적 전년대비
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((250 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 8, "160");  // 당년 당월 전일누적
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((260 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 9, "170");  // 당년 당월 당일
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((270 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 10, "180");  // 당년 당월 당월누적
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((280 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 11, "190");  // 당년 연간누적 F
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((290 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 1, 12, "1901");  // 당년 연간누적 집행률
-            for (int i = 0; i < 11; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((2901 + i * 100).ToString(), true);
-            }
-
-            // 세부현황 - 지출
-            _hwpDocument.SetTableCellText(tableIndex, 2, 2, "100");  // 전년 11월말
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((200 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 3, "110");  // 전년 12월말
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((210 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 4, "120");  // 당년 연간 전망
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((220 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 5, "130");  // 당년 전월
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((230 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 6, "140");  // 당년 당월 당일
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((240 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 7, "150");  // 당년 당월 누적
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((250 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 8, "160");  // 당년 연간 누적
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((260 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 9, "170");  // 당년 당월 당일
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((270 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 10, "180");  // 당년 당월 당월누적
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((280 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 11, "190");  // 당년 연간누적 F
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((290 + i * 100).ToString(), true);
-            }
-
-            _hwpDocument.SetTableCellText(tableIndex, 2, 12, "1901");  // 당년 연간누적 집행률
-            for (int i = 0; i < 12; i++)
-            {
-                _hwpDocument.MoveDownCell();
-                _hwpDocument.InsertText((2901 + i * 100).ToString(), true);
-            }
-
-            // 세부현황 - 수지
-            _hwpDocument.SetTableCellText(tableIndex, 3, 2, "100");  // 전년 11월말
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("200", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 3, "110");  // 전년 12월말 연간누적
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("210", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 4, "120");  // 당년 연간 전망
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("220", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 5, "130");  // 당년 전월 연간누적 금액
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("230", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 6, "140");  // 당년 전월월 연간누적 집행률
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("240", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 7, "150");  // 당년 전월 연간누적 전년대비
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("250", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 8, "160");  // 당년 당월 전일누적
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("260", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 9, "170");  // 당년 당월 당일
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("270", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 10, "180");  // 당년 당월 당월누적
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("280", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 11, "190");  // 당년 연간누적 F
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("290", true);
-
-            _hwpDocument.SetTableCellText(tableIndex, 3, 12, "1901");  // 당년 연간누적 집행률
-            _hwpDocument.MoveDownCell();
-            _hwpDocument.InsertText("2901", true);
 
         }
 
@@ -799,6 +489,7 @@ namespace WindowsFormsApp1
         {
             int tableIndex = 4;
 
+            // 자금예치 현황 - 타이틀
             _hwpDocument.SetTableCellText(tableIndex, 0, 1, "2024년");
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
             _hwpDocument.MoveDownCell();
@@ -813,7 +504,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 10; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -841,7 +532,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 9; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -869,7 +560,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 9; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -897,7 +588,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 9; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -916,7 +607,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 29; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -944,7 +635,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 19; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 
@@ -972,7 +663,7 @@ namespace WindowsFormsApp1
                 for (int r = 0; r < 19; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 100 + c * 100).ToString(), true);
+                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
                 }
             }
 

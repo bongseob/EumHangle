@@ -74,22 +74,23 @@ namespace Eum.Hwp
         /// axHwpCtrl1.InsertBackgroundPicture("SelectedCell","C:/test/test.bmp");
         /// (이미지삽입) 수행 이전에 vHwpCtrl.SetMessageBoxMode(0x00000100); 을 먼저 수행해주어야 합니다.
         /// 다시 설정을 해제하는 vHwpCtrl.SetMessageBoxMode(0x00000000);를 적용
-        /// </summary>
-        public void InsertImage(string imagePath)
+        /// </summary>        
+        /// <param name="imagePath">이미지 파일 경로</param>
+        public void InsertImage(string imagePath, int opt=2, int w=0, int h=0)
         {
-            RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample");
+            RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample");  // 보안 모듈 등록
 
             bool embedded = true;    // 이미지 파일을 문서내에 포함할지 여부 (True/False). 생략하면 true
-            int sizeoption = 2;      // 삽입할 그림의 크기 옵션 0: 원본 크기 1: 사용자가 지정한 크기 (mmPicWidth, mmPicHeight 값 사용) 2:문서에 맞게 자동 조절
+            int sizeoption = opt;      // 삽입할 그림의 크기 옵션 0: 원본 크기 1: 사용자가 지정한 크기 (mmPicWidth, mmPicHeight 값 사용) 2:문서에 맞게 자동 조절
             bool reverse = false;    // 이미지 반전 유무
             bool watermark = false;  // 워터마크 여부
             int effect = 0;          // 이미지 효과 0: 없음
-            int mmPicWidth = 0;      // 그림 가로 크기 (sizeoption이 1일 때 사용, 단위: mm)
-            int mmPicHeight = 0;     // 그림 세로 크기 (sizeoption이 1일 때 사용, 단위: mm)
+            int mmPicWidth = w;      // 그림 가로 크기 (sizeoption이 1일 때 사용, 단위: mm)
+            int mmPicHeight = h;     // 그림 세로 크기 (sizeoption이 1일 때 사용, 단위: mm)
             _hwp.InsertPicture(imagePath, embedded, sizeoption, reverse, watermark, effect, mmPicWidth, mmPicHeight);
         }
 
-        public void RegisterModule(string dllName, string moduleName)
+        private void RegisterModule(string dllName, string moduleName)
         {
             _hwp.RegisterModule(dllName, moduleName);
         }
