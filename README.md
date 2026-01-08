@@ -65,3 +65,11 @@
             _hwp.RegisterModule(dllName, moduleName);
         }
 ```
+RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample"); 
+위 함수의 인자값은 자신의 레지스트리 등록 내용과 일치 시켜야 한다.
+<img width="1312" height="342" alt="image" src="https://github.com/user-attachments/assets/c1539ede-5c3a-4211-8a4a-7105ca91672a" />
+
+## 표를 채울 때 주의 사항 ##
+표에서 셀합치기가 적용된 경우 행과 열번호가 변경이 생긴다.
+행과 열번호는 가장 위쪽과 가장 좌측을 기준으로 번호가 적용되기 때문에 첫 행이나 열에 셀합치기가 적용된 경우 반복문으로 처리할 때 주의를 해야 한다.
+그래서 나는 기준이 되는 곳만 행, 열의 번호로 적용하고 이후 컬럼은 MoveDownCell 액션으로 제어했다.
