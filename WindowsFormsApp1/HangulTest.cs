@@ -26,6 +26,7 @@ namespace WindowsFormsApp1
 
         private HwpDocument _hwpDocument;
         private HwpApplication _hwpApplication;
+        private DataTable _totalSummaryTable = null;
 
         public HangulTest()
         {
@@ -278,6 +279,16 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            ChageDocument();
+
+            sw.Stop();
+            Debug.WriteLine($"실행 시간: {sw.ElapsedMilliseconds} ms");
+        }
+
         private void ChageDocument()
         {
             if (!IsDocumentReady()) return;
@@ -354,16 +365,91 @@ namespace WindowsFormsApp1
             //파일저장및종료();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+
+        /// <summary>
+        /// 문서에 사용될 DataTable 삽입
+        /// </summary>
+        /// <param name="gubun"></param>
+        private void InsertDataTable(string gubun)
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            if (gubun == "총괄현황")
+            {
+                int maxRow = 12;
+                if (_totalSummaryTable != null) _totalSummaryTable.Reset();
+                _totalSummaryTable = new DataTable();
 
-            ChageDocument();
-            
-            sw.Stop();
-            Debug.WriteLine($"실행 시간: {sw.ElapsedMilliseconds} ms");
+                // 컬럼 정의
+                _totalSummaryTable.Columns.Add("C01", typeof(string));
+                _totalSummaryTable.Columns.Add("C02", typeof(string));
+                _totalSummaryTable.Columns.Add("C03", typeof(string));
+                _totalSummaryTable.Columns.Add("C04", typeof(string));
+                _totalSummaryTable.Columns.Add("C05", typeof(string));
+                _totalSummaryTable.Columns.Add("C06", typeof(string));
+                _totalSummaryTable.Columns.Add("C07", typeof(string));
+
+                int v = 0;
+
+                // 행 추가 및 데이터 채우기
+                for (int i = 0; i < maxRow; i++)
+                {
+                    DataRow row = _totalSummaryTable.NewRow();
+                    row["C01"] = (1000 + v).ToString("N0");
+                    row["C02"] = (2000 + v).ToString("N0");
+                    row["C03"] = (3000 + v).ToString("N0");
+                    row["C04"] = (4000 + v).ToString("N0");
+                    row["C05"] = (5000 + v).ToString("N0");
+                    row["C06"] = (6000 + v).ToString("N0");
+                    row["C07"] = (7000 + v).ToString("N0");
+                    _totalSummaryTable.Rows.Add(row);
+
+                    ++v;
+                }
+            }
+            else if (gubun == "세부현황")
+            {
+                int maxRow = 27;
+                if (_totalSummaryTable != null) _totalSummaryTable.Reset();
+                _totalSummaryTable = new DataTable();
+
+                // 컬럼 정의
+                _totalSummaryTable.Columns.Add("C01", typeof(string));
+                _totalSummaryTable.Columns.Add("C02", typeof(string));
+                _totalSummaryTable.Columns.Add("C03", typeof(string));
+                _totalSummaryTable.Columns.Add("C04", typeof(string));
+                _totalSummaryTable.Columns.Add("C05", typeof(string));
+                _totalSummaryTable.Columns.Add("C06", typeof(string));
+                _totalSummaryTable.Columns.Add("C07", typeof(string));
+                _totalSummaryTable.Columns.Add("C08", typeof(string));
+                _totalSummaryTable.Columns.Add("C09", typeof(string));
+                _totalSummaryTable.Columns.Add("C10", typeof(string));
+                _totalSummaryTable.Columns.Add("C11", typeof(string));
+
+                int v = 0;
+
+                // 행 추가 및 데이터 채우기
+                for (int i = 0; i < maxRow; i++)
+                {
+                    DataRow row = _totalSummaryTable.NewRow();
+                    row["C01"] = (1000 + v).ToString("N0");
+                    row["C02"] = (2000 + v).ToString("N0");
+                    row["C03"] = (3000 + v).ToString("N0");
+                    row["C04"] = (4000 + v).ToString("N0");
+                    row["C05"] = (5000 + v).ToString("N0");
+                    row["C06"] = (6000 + v).ToString("N0");
+                    row["C07"] = (7000 + v).ToString("N0");
+                    row["C08"] = (8000 + v).ToString("N0");
+                    row["C09"] = (9000 + v).ToString("N0");
+                    row["C10"] = (1000 + v).ToString("N0");
+                    row["C11"] = (1100 + v).ToString("N0");
+                    _totalSummaryTable.Rows.Add(row);
+
+                    ++v;
+                }
+
+            }
+
         }
-
+         
         /// <summary>
         /// 제목일자
         /// </summary>
@@ -398,6 +484,8 @@ namespace WindowsFormsApp1
         {
             int tableIndex = 1;
 
+            InsertDataTable("총괄현황");  // 데이터 삽입
+
             // 총괄 현황 - 타이틀
             _hwpDocument.SetTableCellText(tableIndex, 0, 1, "2024년");
             _hwpDocument.MoveDownCell();
@@ -421,13 +509,28 @@ namespace WindowsFormsApp1
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
 
             // 총괄 현황 - 내역
-            for (int c = 0; c < 7; c++)
+            if (_totalSummaryTable == null)
+                throw new InvalidOperationException("총괄현황 DataTable이 설정되지 않았습니다.");
+
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = _totalSummaryTable.Rows.Count;
+            int colCount = _totalSummaryTable.Columns.Count;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
-                for (int r = 0; r < 10; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount-1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
 
@@ -453,6 +556,8 @@ namespace WindowsFormsApp1
         {
             int tableIndex = 3;
 
+            InsertDataTable("세부현황");  // 데이터 삽입
+
             // 세부 현황 - 타이틀
             _hwpDocument.SetTableCellText(tableIndex, 0, 1, "2024년");
             _hwpDocument.MoveDownCell();
@@ -470,16 +575,41 @@ namespace WindowsFormsApp1
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
 
             // 세부 현황 - 월별현황
-            for (int c = 0; c < 11; c++)
+            //for (int c = 0; c < 11; c++)
+            //{
+            //    _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
+            //    for (int r = 0; r < 26; r++)
+            //    {
+            //        _hwpDocument.MoveDownCell();
+            //        _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+            //    }
+            //}
+
+            // 세부 현황 - 내역
+            if (_totalSummaryTable == null)
+                throw new InvalidOperationException("세부현황 DataTable이 설정되지 않았습니다.");
+
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = _totalSummaryTable.Rows.Count;
+            int colCount = _totalSummaryTable.Columns.Count;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
-                for (int r = 0; r < 26; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
