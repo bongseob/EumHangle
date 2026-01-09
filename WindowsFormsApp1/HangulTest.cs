@@ -16,6 +16,8 @@ using Eum.Hwp;
 using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Net.NetworkInformation;
+using Oracle.ManagedDataAccess.Client;
+using System.Globalization;
 
 namespace WindowsFormsApp1
 {
@@ -26,6 +28,15 @@ namespace WindowsFormsApp1
         //[DllImport("ole32.dll")]
         //private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable prot);
 
+        static String oraHost = "127.0.0.1";
+        static String oraSID = "xe";
+        static String oraPort = "1521";
+        static String oraUserID = "scott";
+        static String oraUserPW = "tiger";
+
+        static OracleConnection oraCon = null;
+        static OracleCommand oraCmd;
+
         private HwpDocument _hwpDocument;
         private HwpApplication _hwpApplication;
         private DataTable _totalSummaryTable = null;
@@ -33,6 +44,29 @@ namespace WindowsFormsApp1
         public HangulTest()
         {
             InitializeComponent();
+        }
+
+        static private bool ConnectionDB(string dbIp, string dbName, string dbPort, string dbId, string dbPw)
+        {
+            bool retValue = false;
+            try
+            {
+                string connectionString = $"Data Source = (DESCRIPTION="
+                                        + $"(ADDRESS=(PROTOCOL=TCP)(HOST={dbIp})(PORT={dbPort}))"
+                                        + $"(CONNECT_DATA=(SERVER=DEDICATED)(SID={dbName})));"
+                                        + $"User Id={dbId};Password={dbPw};Connection Timeout=5;";
+                oraCon = new OracleConnection(connectionString);
+                oraCon.Open();
+                oraCmd = oraCon.CreateCommand();
+                retValue = true;
+            }
+            catch (Exception e)
+            {
+                retValue = false;
+                MessageBox.Show($"DB connection fail.\n {e.Message}");
+            }
+
+            return retValue;
         }
 
         private void btnNewHwp_Click(object sender, EventArgs e)
@@ -65,7 +99,93 @@ namespace WindowsFormsApp1
         {
             // 한글 파일 열 때 경고문 출현 방지 (레지스트리에 보안모듈 추가)
             RegisterSecurityModule();
+
+            if (ConnectionDB(oraHost, oraSID, oraPort, oraUserID, oraUserPW))
+            {
+                ExecuteDataReader();
+            }
+
         }
+
+        private void ExecuteDataReader()
+        {
+            //string query = $@"select * from emp";
+            string query = $@"select * from tbl_test";
+            oraCmd.CommandText = query;
+
+            using (OracleDataReader dr = oraCmd.ExecuteReader())
+            {
+                if (dr != null)
+                {
+                    // 오라클  DataReader -> DataTable 변환
+                    System.Data.DataSet ds = new System.Data.DataSet();
+
+                    DataTable tbl = GetTable(dr);
+                    _totalSummaryTable = tbl.DefaultView.ToTable(false, new string[] { "COL01", "COL02", "COL03", "COL04", "COL05", "COL06", "COL07", "COL08", "COL09", "COL10", "COL11", "COL12", "COL13" });
+
+                    AddCommaToDataTable(_totalSummaryTable);
+
+                    ultraGrid1.DataSource = _totalSummaryTable;
+
+                }
+            }
+        }
+
+        private void AddCommaToDataTable(DataTable table)
+        {
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (DataColumn col in table.Columns)
+                {
+                    string value = row[col]?.ToString();
+
+                    if (string.IsNullOrWhiteSpace(value))
+                        continue;
+
+                    // 정수 또는 소수 모두 처리
+                    if (decimal.TryParse(value, out decimal number))
+                    {
+                        row[col] = number.ToString("#,##0.################", CultureInfo.InvariantCulture);
+                    }
+                }
+            }
+        }
+
+        public System.Data.DataTable GetTable(OracleDataReader reader)
+        {
+            System.Data.DataTable table = reader.GetSchemaTable();
+            System.Data.DataTable dt = new System.Data.DataTable();
+            System.Data.DataColumn dc;
+            System.Data.DataRow row;
+            System.Collections.ArrayList aList = new System.Collections.ArrayList();
+
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                dc = new System.Data.DataColumn();
+
+                if (!dt.Columns.Contains(table.Rows[i]["ColumnName"].ToString()))
+                {
+                    dc.ColumnName = table.Rows[i]["ColumnName"].ToString();
+                    //dc.Unique = Convert.ToBoolean(table.Rows[i]["IsUnique"]);
+                    dc.AllowDBNull = Convert.ToBoolean(table.Rows[i]["AllowDBNull"]);
+                    dc.ReadOnly = Convert.ToBoolean(table.Rows[i]["IsReadOnly"]);
+                    aList.Add(dc.ColumnName);
+                    dt.Columns.Add(dc);
+                }
+            }
+
+            while (reader.Read())
+            {
+                row = dt.NewRow();
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    row[((System.String)aList[i])] = reader[(System.String)aList[i]];
+                }
+                dt.Rows.Add(row);
+            }
+            return dt;
+        }
+
 
         /// <summary>
         /// 한/글 자동화 보안 모듈을 레지스트리에 등록하여 파일 접근 보안 창이 뜨지 않도록 합니다.
@@ -199,6 +319,11 @@ namespace WindowsFormsApp1
                 _hwpDocument = null;
                 _hwpApplication = new HwpApplication(visible: true);
                 _hwpDocument = _hwpApplication.OpenDocument(openFileDialog1.FileName);
+
+                if (ConnectionDB(oraHost, oraSID, oraPort, oraUserID, oraUserPW))
+                {
+                    ExecuteDataReader();
+                }
             }
         }
 
@@ -283,8 +408,8 @@ namespace WindowsFormsApp1
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (_totalSummaryTable == null)
-                throw new InvalidOperationException("차트 생성을 위한 DataTable이 설정되지 않았습니다.");
+            //if (_totalSummaryTable == null)
+            //    throw new InvalidOperationException("차트 생성을 위한 DataTable이 설정되지 않았습니다.");
 
             SaveChartImage();
 
@@ -310,43 +435,43 @@ namespace WindowsFormsApp1
             총괄현황();
 
             //// [표2] 조기지급 현황
-            //조기지급현황();
+            조기지급현황();
 
             //// 선지급 미상환 잔액
-            //선지급미상환잔액();
+            선지급미상환잔액();
 
             // [표3] 세부 현황
             세부현황();
 
-            //// [표4] 자금예치 현황
+            // [표4] 자금예치 현황
             자금예치현황();
 
-            //// [표5] 당원수지현황당월
-            //당월수지현황당월();
+            // [표5] 당원수지현황당월
+            당월수지현황당월();
 
-            //// [표6] 당기수지현황누적
-            //당기수지현황누적();
+            // [표6] 당기수지현황누적
+            당기수지현황누적();
 
-            //// [표7] 누적수지현황
-            //누적수지현황();
+            // [표7] 누적수지현황
+            누적수지현황();
 
-            //// [표8~표17] 연도별월별재정현황 
-            //연도별월별재정현황(8);  // 표8    
-            //연도별월별재정현황(9);  // 표9
-            //연도별월별재정현황(10); // 표10
-            //연도별월별재정현황(11); // 표11
-            //연도별월별재정현황(12); // 표12
-            //연도별월별재정현황(13); // 표13
-            //연도별월별재정현황(14); // 표14
-            //연도별월별재정현황(15); // 표15
-            //연도별월별재정현황(16); // 표16
-            //연도별월별재정현황(17); // 표17
+            // [표8~표17] 연도별월별재정현황 
+            연도별월별재정현황(8);  // 표8    
+            연도별월별재정현황(9);  // 표9
+            연도별월별재정현황(10); // 표10
+            연도별월별재정현황(11); // 표11
+            연도별월별재정현황(12); // 표12
+            연도별월별재정현황(13); // 표13
+            연도별월별재정현황(14); // 표14
+            연도별월별재정현황(15); // 표15
+            연도별월별재정현황(16); // 표16
+            연도별월별재정현황(17); // 표17
 
-            //// [표18] 월별보험급여비수입현황비교 
-            //월별보험급여비수입현황비교();
+            // [표18] 월별보험급여비수입현황비교 
+            월별보험급여비수입현황비교();
 
-            //// [표19] 월별보험급여비지출현황비교 
-            //월별보험급여비지출현황비교();
+            // [표19] 월별보험급여비지출현황비교 
+            월별보험급여비지출현황비교();
 
             //// 표를 빠져 나와서 다음 작업을 위해 한 줄 내림
             //_hwpDocument.MoveOutOfTable();
@@ -386,13 +511,13 @@ namespace WindowsFormsApp1
                 _totalSummaryTable = new DataTable();
 
                 // 컬럼 정의
-                _totalSummaryTable.Columns.Add("C01", typeof(string));
-                _totalSummaryTable.Columns.Add("C02", typeof(string));
-                _totalSummaryTable.Columns.Add("C03", typeof(string));
-                _totalSummaryTable.Columns.Add("C04", typeof(string));
-                _totalSummaryTable.Columns.Add("C05", typeof(string));
-                _totalSummaryTable.Columns.Add("C06", typeof(string));
-                _totalSummaryTable.Columns.Add("C07", typeof(string));
+                _totalSummaryTable.Columns.Add("COL01", typeof(string));
+                _totalSummaryTable.Columns.Add("COL02", typeof(string));
+                _totalSummaryTable.Columns.Add("COL03", typeof(string));
+                _totalSummaryTable.Columns.Add("COL04", typeof(string));
+                _totalSummaryTable.Columns.Add("COL05", typeof(string));
+                _totalSummaryTable.Columns.Add("COL06", typeof(string));
+                _totalSummaryTable.Columns.Add("COL07", typeof(string));
 
                 int v = 0;
 
@@ -400,13 +525,13 @@ namespace WindowsFormsApp1
                 for (int i = 0; i < maxRow; i++)
                 {
                     DataRow row = _totalSummaryTable.NewRow();
-                    row["C01"] = (1000 + v).ToString("N0");
-                    row["C02"] = (2000 + v).ToString("N0");
-                    row["C03"] = (3000 + v).ToString("N0");
-                    row["C04"] = (4000 + v).ToString("N0");
-                    row["C05"] = (5000 + v).ToString("N0");
-                    row["C06"] = (6000 + v).ToString("N0");
-                    row["C07"] = (7000 + v).ToString("N0");
+                    row["COL01"] = (1000 + v).ToString("N0");
+                    row["COL02"] = (2000 + v).ToString("N0");
+                    row["COL03"] = (3000 + v).ToString("N0");
+                    row["COL04"] = (4000 + v).ToString("N0");
+                    row["COL05"] = (5000 + v).ToString("N0");
+                    row["COL06"] = (6000 + v).ToString("N0");
+                    row["COL07"] = (7000 + v).ToString("N0");
                     _totalSummaryTable.Rows.Add(row);
 
                     ++v;
@@ -419,17 +544,17 @@ namespace WindowsFormsApp1
                 _totalSummaryTable = new DataTable();
 
                 // 컬럼 정의
-                _totalSummaryTable.Columns.Add("C01", typeof(string));
-                _totalSummaryTable.Columns.Add("C02", typeof(string));
-                _totalSummaryTable.Columns.Add("C03", typeof(string));
-                _totalSummaryTable.Columns.Add("C04", typeof(string));
-                _totalSummaryTable.Columns.Add("C05", typeof(string));
-                _totalSummaryTable.Columns.Add("C06", typeof(string));
-                _totalSummaryTable.Columns.Add("C07", typeof(string));
-                _totalSummaryTable.Columns.Add("C08", typeof(string));
-                _totalSummaryTable.Columns.Add("C09", typeof(string));
-                _totalSummaryTable.Columns.Add("C10", typeof(string));
-                _totalSummaryTable.Columns.Add("C11", typeof(string));
+                _totalSummaryTable.Columns.Add("COL01", typeof(string));
+                _totalSummaryTable.Columns.Add("COL02", typeof(string));
+                _totalSummaryTable.Columns.Add("COL03", typeof(string));
+                _totalSummaryTable.Columns.Add("COL04", typeof(string));
+                _totalSummaryTable.Columns.Add("COL05", typeof(string));
+                _totalSummaryTable.Columns.Add("COL06", typeof(string));
+                _totalSummaryTable.Columns.Add("COL07", typeof(string));
+                _totalSummaryTable.Columns.Add("COL08", typeof(string));
+                _totalSummaryTable.Columns.Add("COL09", typeof(string));
+                _totalSummaryTable.Columns.Add("COL10", typeof(string));
+                _totalSummaryTable.Columns.Add("COL11", typeof(string));
 
                 int v = 0;
 
@@ -437,17 +562,17 @@ namespace WindowsFormsApp1
                 for (int i = 0; i < maxRow; i++)
                 {
                     DataRow row = _totalSummaryTable.NewRow();
-                    row["C01"] = (1000 + v).ToString("N0");
-                    row["C02"] = (2000 + v).ToString("N0");
-                    row["C03"] = (3000 + v).ToString("N0");
-                    row["C04"] = (4000 + v).ToString("N0");
-                    row["C05"] = (5000 + v).ToString("N0");
-                    row["C06"] = (6000 + v).ToString("N0");
-                    row["C07"] = (7000 + v).ToString("N0");
-                    row["C08"] = (8000 + v).ToString("N0");
-                    row["C09"] = (9000 + v).ToString("N0");
-                    row["C10"] = (1000 + v).ToString("N0");
-                    row["C11"] = (1100 + v).ToString("N0");
+                    row["COL01"] = (1000 + v).ToString("N0");
+                    row["COL02"] = (2000 + v).ToString("N0");
+                    row["COL03"] = (3000 + v).ToString("N0");
+                    row["COL04"] = (4000 + v).ToString("N0");
+                    row["COL05"] = (5000 + v).ToString("N0");
+                    row["COL06"] = (6000 + v).ToString("N0");
+                    row["COL07"] = (7000 + v).ToString("N0");
+                    row["COL08"] = (8000 + v).ToString("N0");
+                    row["COL09"] = (9000 + v).ToString("N0");
+                    row["COL10"] = (1000 + v).ToString("N0");
+                    row["COL11"] = (1100 + v).ToString("N0");
                     _totalSummaryTable.Rows.Add(row);
 
                     ++v;
@@ -491,7 +616,7 @@ namespace WindowsFormsApp1
         {
             int tableIndex = 1;
 
-            InsertDataTable("총괄현황");  // 데이터 삽입
+            //InsertDataTable("총괄현황");  // 데이터 삽입
 
             // 총괄 현황 - 타이틀
             _hwpDocument.SetTableCellText(tableIndex, 0, 1, "2024년");
@@ -523,8 +648,8 @@ namespace WindowsFormsApp1
             int startCol = 2;
             int dtRow = startRow;
 
-            int rowCount = _totalSummaryTable.Rows.Count;
-            int colCount = _totalSummaryTable.Columns.Count;
+            int rowCount = 11;
+            int colCount = 7;
 
             for (int c = 0; c < colCount; c++)
             {
@@ -563,7 +688,7 @@ namespace WindowsFormsApp1
         {
             int tableIndex = 3;
 
-            InsertDataTable("세부현황");  // 데이터 삽입
+            //InsertDataTable("세부현황");  // 데이터 삽입
 
             // 세부 현황 - 타이틀
             _hwpDocument.SetTableCellText(tableIndex, 0, 1, "2024년");
@@ -581,17 +706,6 @@ namespace WindowsFormsApp1
             _hwpDocument.MoveDownCell();
             _hwpDocument.SetTableCellText(tableIndex, 0, 2, "2025년");
 
-            // 세부 현황 - 월별현황
-            //for (int c = 0; c < 11; c++)
-            //{
-            //    _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
-            //    for (int r = 0; r < 26; r++)
-            //    {
-            //        _hwpDocument.MoveDownCell();
-            //        _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
-            //    }
-            //}
-
             // 세부 현황 - 내역
             if (_totalSummaryTable == null)
                 throw new InvalidOperationException("세부현황 DataTable이 설정되지 않았습니다.");
@@ -600,8 +714,8 @@ namespace WindowsFormsApp1
             int startCol = 2;
             int dtRow = startRow;
 
-            int rowCount = _totalSummaryTable.Rows.Count;
-            int colCount = _totalSummaryTable.Columns.Count;
+            int rowCount = 27;
+            int colCount = 11;
 
             for (int c = 0; c < colCount; c++)
             {
@@ -634,17 +748,30 @@ namespace WindowsFormsApp1
             _hwpDocument.MoveNextCell();
             _hwpDocument.InsertText("당월(12월)", true);
 
-            // 자금예치 현황 
-            for (int c = 0; c < 12; c++)
+            if (_totalSummaryTable == null)
+                throw new InvalidOperationException("세부현황 DataTable이 설정되지 않았습니다.");
+
+            int startRow = 1;
+            int startCol = 1;
+            int dtRow = startRow;
+
+            int rowCount = 11;
+            int colCount = 12;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 1, (100 + c * 100).ToString());
-                for (int r = 0; r < 10; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -662,17 +789,28 @@ namespace WindowsFormsApp1
                 _hwpDocument.InsertText($"{(2017 + r).ToString()}년" , true);
             }
 
-            // 월별현황
-            for (int c = 0; c < 12; c++)
+            // 당월수지현황당월
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = 10;
+            int colCount = 11;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 1, (100 + c * 100).ToString());
-                for (int r = 0; r < 9; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -691,16 +829,27 @@ namespace WindowsFormsApp1
             }
 
             // 월별현황
-            for (int c = 0; c < 12; c++)
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = 10;
+            int colCount = 11;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 1, (100 + c * 100).ToString());
-                for (int r = 0; r < 9; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -719,13 +868,25 @@ namespace WindowsFormsApp1
             }
 
             // 월별현황
-            for (int c = 0; c < 12; c++)
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = 10;
+            int colCount = 11;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 1, (100 + c * 100).ToString());
-                for (int r = 0; r < 9; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
 
@@ -738,16 +899,27 @@ namespace WindowsFormsApp1
         {
             //int tableIndex = 8;
 
-            for (int c = 0; c < 12; c++)
+            int startRow = 1;
+            int startCol = 2;
+            int dtRow = startRow;
+
+            int rowCount = 30;
+            int colCount = 12;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 2, (100 + c * 100).ToString());
-                for (int r = 0; r < 29; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -766,16 +938,27 @@ namespace WindowsFormsApp1
             }
 
             // 월별현황
-            for (int c = 0; c < 13; c++)
+            int startRow = 1;
+            int startCol = 3;
+            int dtRow = startRow;
+
+            int rowCount = 20;
+            int colCount = 13;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 3, (100 + c * 100).ToString());
-                for (int r = 0; r < 19; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -794,16 +977,27 @@ namespace WindowsFormsApp1
             }
 
             // 월별현황
-            for (int c = 0; c < 13; c++)
+            int startRow = 1;
+            int startCol = 3;
+            int dtRow = startRow;
+
+            int rowCount = 20;
+            int colCount = 13;
+
+            for (int c = 0; c < colCount; c++)
             {
-                _hwpDocument.SetTableCellText(tableIndex, 1, c + 3, (100 + c * 100).ToString());
-                for (int r = 0; r < 19; r++)
+                string value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+
+                _hwpDocument.SetTableCellText(tableIndex, startRow, startCol + c, value);
+                for (int r = 0; r < rowCount - 1; r++)
                 {
                     _hwpDocument.MoveDownCell();
-                    _hwpDocument.InsertText((r + 101 + c * 100).ToString(), true);
+
+                    dtRow = startRow + r + 1;
+                    value = Convert.ToString(_totalSummaryTable.Rows[dtRow - startRow][c]) ?? string.Empty;
+                    _hwpDocument.InsertText(value, true);
                 }
             }
-
         }
 
         /// <summary>
@@ -1066,5 +1260,7 @@ namespace WindowsFormsApp1
                 //s.DataLabels.ShowValue = true;
             }
         }
+
+
     }
 }
