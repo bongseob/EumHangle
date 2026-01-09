@@ -45,6 +45,7 @@
         }
 ```
 3. 그리고 이미지 추가의 경우는 다음처럼 처리해 주었다.
+   이미지를 추가할 때 _hwp.RegisterModule 을 호출했다. 호출에 사용된 인자값은 레지스트리에 등록된 값과 일치시켜줘야 한다.
 ```cs
         public void InsertImage(string imagePath)
         {
