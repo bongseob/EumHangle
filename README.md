@@ -74,3 +74,27 @@ RegisterModule("FilePathCheckDLL", "FilePathCheckerModuleExample");
 표에서 셀합치기가 적용된 경우 행과 열번호가 변경이 생긴다.
 행과 열번호는 가장 위쪽과 가장 좌측을 기준으로 번호가 적용되기 때문에 첫 행이나 열에 셀합치기가 적용된 경우 반복문으로 처리할 때 주의를 해야 한다.
 그래서 나는 기준이 되는 곳만 행, 열의 번호로 적용하고 이후 컬럼은 MoveDownCell 액션으로 제어했다.
+
+## 기타 사항 ##
+도커에 다음과 같이 오라클을 올려서 사용했다.
+```
+docker pull jaspeen/oracle-xe-11g
+docker run --name oracle -d -p 1521:1521 jaspeen/oracle-xe-11g -v C:/Users/USER/Desktop/oradata:/u01/app/oracle
+docker exec -it oracle sqlplus
+```
+
+<img width="1903" height="740" alt="image" src="https://github.com/user-attachments/assets/fcb45563-5b56-4d6d-8d3b-7afa50b05866" />
+
+오라클 한글 깨짐 방지 처리
+```sql
+$ sqlplus /nolog 
+
+SQL> connnect sys/oracle as sysdba 
+SQL> startup;
+SQL> update sys.props$ set value$='UTF8' where name = 'NLS_CHARACTERSET'; 
+SQL> update sys.props$ set VALUE$='KOREAN' where name='NLS_LANGUAGE';
+SQL> update sys.props$ set VALUE$='KOREA'  where name='NLS_TERRITORY';
+SQL> commit; 
+SQL> shutdown immediate; 
+SQL> startup;
+```
